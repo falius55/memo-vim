@@ -32,7 +32,7 @@ def openWindow(moveActive=True):
     buffer = window.getBuffer()
 
     memoName = 'memo %d %s' % (row, buffer.getName())
-    memoWindow = Window.builder(vimObject).pos(Position.TOPPEST).name(memoName).size(5).moveActiveWindow(moveActive).bufType('acwrite').build()
+    memoWindow = Window.builder(vimObject).pos(Position.TOP).name(memoName).size(5).moveActiveWindow(moveActive).bufType('acwrite').build()
     memoBuffer = memoWindow.getBuffer()
     memoBuffer.setTag(MEMO_BUFFER_TAG)
     buffer.getMemo().load(row, memoBuffer)
@@ -174,7 +174,10 @@ def findTargetBufferFrom(memoBuffer):
 
 
 def debug():
-    print 'Buffer() list', [e.getName() for e in vimObject._buffers]
+    try:
+        print 'Buffer() list', [e.getName() for e in vimObject._buffers]
+    except vim.error:
+        print 'vim.error'
     print 'buffer elems', [e.name for e in vim.buffers]
 
 

@@ -141,6 +141,7 @@ class WindowBuilder(object):
         self._mapQStop = False
         self._name = None
         self._bufType = None
+        self._recycleBuffer = None
 
     def pos(self, pos=Position.LEFTEST):
         if Position.stringFrom(pos) is None:
@@ -172,11 +173,15 @@ class WindowBuilder(object):
         self._bufType = type
         return self
 
+    def recycleBuffer(self, recycleBuffer):
+        self._recycleBuffer = recycleBuffer
+        return self
+
     def build(self):
         print 'window builder build()'
         saveWindow = self._vim.getCurrentWindow()
 
-        newWindow = self._createEmptyWindow()
+        newWindow = self._createWindow()
         newBuffer = newWindow.getBuffer()
         self._setSize(newWindow, self._size)
         newBuffer.setModifiable(self._modifiable)
@@ -191,17 +196,37 @@ class WindowBuilder(object):
             newBuffer.mapQStop()
         return newWindow
 
-    def _createEmptyWindow(self):
+    def _createWindow(self):
         if self._pos == Position.TOPPEST:
-            vim.command('topleft new')
+            vim.command('topleft ' + self._argCommand(False, self._recycleBuffer))
         elif self._pos == Position.LEFTEST:
-            vim.command('topleft vnew')
+            vim.command('topleft ' + self._argCommand(True, self._recycleBuffer))
         elif self._pos == Position.RIGHTEST:
-            vim.command('botright vnew')
+            vim.command('botright ' + self._argCommand(True, self._recycleBuffer))
         elif self._pos == Position.DOWNEST:
-            vim.command('botright new')
+            vim.command('botright ' + self._argCommand(False, self._recycleBuffer))
+        elif self._pos == Position.TOP:
+            vim.command('aboveleft ' + self._argCommand(False, self._recycleBuffer))
+        elif self._pos == Position.LEFT:
+            vim.command('aboveleft ' + self._argCommand(True, self._recycleBuffer))
+        elif self._pos == Position.RIGHT:
+            vim.command('belowright ' + self._argCommand(True, self._recycleBuffer))
+        elif self._pos == Position.DOWN:
+            vim.command('belowright ' + self._argCommand(False, self._recycleBuffer))
         newWindow = self._keepUpVim()
         return newWindow
+
+    def _argCommand(self, isVertical=False, recycleBuffer=None):
+        if recycleBuffer is None:
+            if isVertical:
+                return 'vnew'
+            else:
+                return 'new'
+        else:
+            if isVertical:
+                return 'vsp ' + recycleBuffer.getName()
+            else:
+                return 'sp ' + recycleBuffer.getName()
 
     def _keepUpVim(self):
         """

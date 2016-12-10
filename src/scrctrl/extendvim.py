@@ -46,7 +46,8 @@ def checkDeadElem(func):
             if not tab.isExist():
                 wvim.remove(tab)
 
-        func(self, *args, **kwargs)
+        return func(self, *args, **kwargs)
+    return wrapper
 
 
 class Vim(object):
@@ -108,12 +109,14 @@ class Vim(object):
             return filter(lambda e: e.elem() == elem, self._tabs)[0]
         return None
 
+    @checkDeadElem
     def findByTag(self, tag):
         for obj in chain.from_iterable([self._buffers, self._windows, self._tabs]):
             tagOfObj = obj.getTag()
             if tagOfObj == tag:
                 return obj
 
+    @checkDeadElem
     def findBufferByName(self, name):
         for buf in self._buffers:
             if buf.getName() == name:

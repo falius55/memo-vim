@@ -11,8 +11,6 @@ from constant import MEMO_BUFFER_TAG
 
 import vim
 
-# TODO: メモウィンドウを:qなどで直接閉じた場合の挙動を確認
-
 
 def openWindow(moveActive=True):
     """

@@ -61,7 +61,7 @@ def leave():
         memoBuffer.finish()
 
 
-def writeFile():
+def writeFile(bl):
     """
     ウィンドウを移動した時、編集ファイルが保存された時に、メモ内容もファイルに保存する
     """

@@ -139,7 +139,8 @@ def deleteMemo(row=None):
         targetBuffer = currentBuffer
         memo = targetBuffer.getMemo()
 
-    row = targetBuffer.findWindow().getCursorPos()[0]
+    if row is None:
+        row = targetBuffer.findWindow().getCursorPos()[0]
     print 'delete memo', row
     if memo.hasMemo(row):
         print 'memo has'

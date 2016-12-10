@@ -9,6 +9,8 @@ from event import operateByState
 from constant import MEMORY_PRE_TEXT
 from constant import MEMO_BUFFER_TAG
 
+import vim
+
 # TODO: メモウィンドウを:qなどで直接閉じた場合の挙動を確認
 
 
@@ -169,6 +171,11 @@ def findTargetBufferFrom(memoBuffer):
         targetname = match.group(1)
         return vimObject.findBufferByName(targetname)
     raise TypeError('not found target from memo buffer')
+
+
+def debug():
+    print 'Buffer() list', [e.getName() for e in vimObject._buffers]
+    print 'buffer elems', [e.name for e in vim.buffers]
 
 
 if __name__ == '__main__':

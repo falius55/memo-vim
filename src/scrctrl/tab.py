@@ -1,0 +1,55 @@
+#!/usr/bin/python3.4
+# -*- coding: utf-8 -*-
+import vim
+
+
+class Tab(object):
+    DEFAULT_KEY = 'default_key'
+
+    def __init__(self, tab, vim):
+        self._tab = tab
+        self._vim = vim
+        self._tag = {}
+
+    def elem(self):
+        return self._tab
+
+    def setTag(self, key=None, tag=None):
+        if key is None and tag is None:
+            raise ValueError
+        if key is None or tag is None:
+            self._tag[Tab.DEFAULT_KEY] = key if tag is None else tag
+            return
+        self._tag[key] = tag
+
+    def getTag(self, key=None, defaultIfNotFound=None):
+        if key is None:
+            return self._tag.get(Tab.DEFAULT_KEY, defaultIfNotFound)
+        return self._tag.get(key, defaultIfNotFound)
+
+    def getNumber(self):
+        return self._tab.number
+
+    def findWindows(self):
+        return [self._vim.find(e) for e in self._tab.windows]
+
+    def isExist(self):
+        for tabElem in vim.tabpages:
+            if tabElem == self._tab:
+                return True
+        else:
+            return False
+
+    def getVar(self, varName, defaultIfNotFound=None):
+        """
+        t:変数
+        """
+        if defaultIfNotFound is None:
+            return self._tab.vars.get(varName)
+        return self._tab.vars.get(varName, defaultIfNotFound)
+
+    def getCurrentWindow(self):
+        return self._vim._find(self._tab.window)
+
+    def __hash(self):
+        return hash(self._tab)

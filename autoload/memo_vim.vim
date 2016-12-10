@@ -1,0 +1,91 @@
+function! memo_vim#toggle_autcmd_group() abort
+    if g:memo_effect == 0
+        let g:memo_effect = 1
+        call memo_vim#set_autcmd_group(g:memo_effect)
+    elseif g:memo_effect == 1
+        let g:memo_effect = 0
+        call memo_vim#set_autcmd_group(g:memo_effect)
+    endif
+endfunction
+function! memo_vim#set_autcmd_group(bl) abort
+    if a:bl > 0
+        augroup MemoVim
+            autocmd!
+
+            autocmd! CursorMoved,WinEnter * call memo_vim#moved_cursor()  " カーソルが移動した時、別のウィンドウに入った時
+
+            " autocmd! BufWrite * call memo_vim#write_to_file(1)  " ファイルが保存された時
+
+        augroup END
+    elseif a:bl == 0
+        augroup MemoVim
+            autocmd!
+        augroup END
+    endif
+endfunction
+
+function! memo_vim#open_window() abort
+python << OPENMEMO
+openWindow()
+OPENMEMO
+endfunction
+
+function! memo_vim#leave_and_keepout() abort
+python << LEAVEMEMO
+leave()
+LEAVEMEMO
+endfunction
+
+function! memo_vim#update_memo_position() abort
+python << UPDATEPOSITION
+updateMemoPosition()
+UPDATEPOSITION
+endfunction
+
+function! memo_vim#delete_buffer() abort
+python << DELETEBUFFER
+deleteBuffer()
+DELETEBUFFER
+endfunction
+
+function! memo_vim#moved_cursor() abort
+python << MOVEDCURSOR
+movedCursor()
+MOVEDCURSOR
+endfunction
+
+function! memo_vim#write_to_file(bl) abort
+python << SAVEFILE
+writeFile(int(vim.eval('a:bl')) != 0)
+SAVEFILE
+endfunction
+
+function! memo_vim#init_buffer() abort
+python << INITBUFFER
+initBuffer()
+INITBUFFER
+endfunction
+
+function! memo_vim#delete_memo(...) abort
+python << DELETEMEMO
+deleteMemo(int(vim.eval('a:1')) if int(vim.eval('a:0')) > 0 else None)
+DELETEMEMO
+endfunction
+
+function! memo_vim#move_memo(row, ...) abort
+python << MOVEMEMO
+if int(vim.eval('a:0')) == 1:
+    fromRow = int(vim.eval('a:row'))
+    toRow = int(vim.eval('a:1'))
+    moveMemo(fromRow, toRow)
+else:
+    toRow = int(vim.eval('a:row'))
+    moveMemo(None, toRow)
+MOVEMEMO
+endfunction
+
+function! memo_vim#debug_memo() abort
+python << MEMODEBUG
+debug()
+MEMODEBUG
+endfunction

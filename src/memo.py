@@ -81,6 +81,7 @@ class Memo(object):
         memoName = 'memo %d %s' % (row, self._targetBuffer.getName())
         memoBuffer.setName(memoName)
         memoBuffer.setTag(key=ROW_TAG, tag=row)
+        self.setBuffer(memoBuffer)
 
     def saveFile(self):
         print 'open', open

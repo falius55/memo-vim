@@ -39,7 +39,7 @@ autocmd! TextChangedI * call memo_vim#update_memo_position()
 
 autocmd! WinLeave * call memo_vim#write_to_file(0)  " ウィンドウを移動した時
 
-" autocmd! BufWriteCmd * call memo_vim#write_to_file(1)  " wによって書き込みされた時。acwriteでないバッファまでwrite_to_file以外で保存できなくなる？
+autocmd! BufWriteCmd * call memo_vim#write_to_file(1)  " wによって書き込みされた時。acwriteでないバッファまでwrite_to_file以外で保存できなくなる？
 
 autocmd! BufWinLeave * call memo_vim#write_to_file(0)  " バッファが破棄された時
 

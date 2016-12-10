@@ -34,7 +34,7 @@ def openWindow(moveActive=True):
     memoBuffer = memoWindow.getBuffer()
     memoBuffer.setTag(MEMO_BUFFER_TAG)
     buffer.getMemo().load(row, memoBuffer)
-    buffer.getMemo().setBuffer(memoBuffer)
+    # buffer.getMemo().setBuffer(memoBuffer)
 
 
 def leave():
@@ -73,20 +73,25 @@ def writeFile(bl):
     else:
         targetBuffer = currentBuffer
 
+    if bl:
+        targetBuffer.findWindow().move()
+        vim.command('w')
+        targetBuffer.setModified(False)
+
     memo = targetBuffer.getMemo()
-    if memo.isEmpty():
-        return
 
-    memo.saveFile()
-
-    # Memoオブジェクトにも変更を通知する
+    # Memoオブジェクトに変更を通知する
     if memo.getBuffer():
         memoBuffer = memo.getBuffer()
         targetWindow = targetBuffer.findWindow()
         row = targetWindow.getCursorPos()[0]
-        memo = targetBuffer.getMemo()
         memo.keepOut(row, memoBuffer)
         memoBuffer.setModified(False)
+
+    if memo.isEmpty():
+        return
+
+    memo.saveFile()
 
 
 def updateMemoPosition():

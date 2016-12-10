@@ -32,7 +32,7 @@ def openWindow(moveActive=True):
     buffer = window.getBuffer()
 
     memoName = 'memo %d %s' % (row, buffer.getName())
-    memoWindow = Window.builder(vimObject).pos(Position.TOP).name(memoName).size(5).moveActiveWindow(moveActive).bufType('acwrite').build()
+    memoWindow = Window.builder(vimObject).pos(Position.TOPPEST).name(memoName).size(5).moveActiveWindow(moveActive).bufType('acwrite').build()
     memoBuffer = memoWindow.getBuffer()
     memoBuffer.setTag(MEMO_BUFFER_TAG)
     buffer.getMemo().load(row, memoBuffer)
@@ -125,13 +125,26 @@ def movedCursor():
     operateByState(vimObject, openWindow)
 
 
-def deleteMemo(row):
-    memo = vimObject.getCurrentWindow().getBuffer().getMemo()
+def deleteMemo(row=None):
+    currentBuffer = vimObject.getCurrentWindow().getBuffer()
+    if currentBuffer.getTag() == MEMO_BUFFER_TAG:
+        targetBuffer = findTargetBufferFrom(currentBuffer)
+        memo = targetBuffer.getMemo()
+        memo.getBuffer().finish()
+        memo.setBuffer(None)
+    else:
+        targetBuffer = currentBuffer
+        memo = targetBuffer.getMemo()
+
+    row = targetBuffer.findWindow().getCursorPos()[0]
+    print 'delete memo', row
     if memo.hasMemo(row):
+        print 'memo has'
         memo.deleteMemo(row)
+        targetBuffer.findWindow().move()
 
 
-def moveMemo(fromRow, toRow):
+def moveMemo(fromRow=None, toRow=None):
     """
     特定の行に紐付けられたメモを、別の行に移動します
     fromRowにNoneを渡した場合には、メモウィンドウ内で実行された場合にはそのメモの対象となる行が、通常のテキストバッファで実行された場合には現在いる行が対象となりtoRowに移動します
@@ -140,13 +153,16 @@ def moveMemo(fromRow, toRow):
     currentBuffer = vimObject.getCurrentWindow().getBuffer()
     if currentBuffer.getTag() == MEMO_BUFFER_TAG:
         targetBuffer = findTargetBufferFrom(currentBuffer)
+        memo = targetBuffer.getMemo()
+        memo.getBuffer().finish()
+        memo.setBuffer(None)
     else:
         targetBuffer = currentBuffer
+        memo = targetBuffer.getMemo()
 
     if fromRow is None:
         fromRow = targetBuffer.findWindow().getCursorPos()[0]
 
-    memo = targetBuffer.getMemo()
     memo.moveMemo(fromRow, toRow)
     targetBuffer.findWindow().move()
 

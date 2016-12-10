@@ -5,6 +5,7 @@ from scrctrl.window import Window, Position
 
 from textdiff import DiffParser
 from event import operateByState
+from util.utils import makeMemoName
 
 from constant import MEMORY_PRE_TEXT
 from constant import MEMO_BUFFER_TAG
@@ -29,7 +30,7 @@ def openWindow(moveActive=True):
     row = window.getCursorPos()[0]
     buffer = window.getBuffer()
 
-    memoName = 'memo %d %s' % (row, buffer.getName())
+    memoName = makeMemoName(buffer, row)
     memoWindow = Window.builder(vimObject).pos(Position.TOPPEST).name(memoName).size(5).moveActiveWindow(moveActive).bufType('acwrite').build()
     memoBuffer = memoWindow.getBuffer()
     memoBuffer.setTag(MEMO_BUFFER_TAG)
@@ -185,7 +186,7 @@ def findTargetBufferFrom(memoBuffer):
     メモバッファーを渡すことでそのメモが対象としているテキストバッファを得られます
     """
     import re
-    p = re.compile(r'memo\s\d+\s(.*)')
+    p = re.compile(r'[^-]+-([^-]+)-memo.*')
     match = p.match(memoBuffer.getName())
     if match:
         targetname = match.group(1)

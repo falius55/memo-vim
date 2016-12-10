@@ -16,3 +16,7 @@ def saveWindow(func):
         saveWindow.move()
     return wrapper
 
+
+def makeMemoName(targetBuffer, row):
+    from os.path import splitext
+    return '%sfile-%s-memo[%d]' % (targetBuffer.getFileType(), splitext(targetBuffer.getName())[0], row)

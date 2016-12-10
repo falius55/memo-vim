@@ -118,8 +118,9 @@ class Vim(object):
 
     @checkDeadElem
     def findBufferByName(self, name):
+        from os.path import splitext
         for buf in self._buffers:
-            if buf.getName() == name:
+            if buf.getName() == name or splitext(buf.getName())[0] == name:
                 return buf
 
     def remove(self, obj):

@@ -182,6 +182,9 @@ class Buffer(object):
         """
         self._buf.options['filetype'] = filetype
 
+    def getFileType(self):
+        return self._buf.options['filetype']
+
     @saveWindow
     def mapQStop(self, canStop=True):
         """

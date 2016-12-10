@@ -6,6 +6,7 @@ import json
 import vim
 
 from constant import ROW_TAG
+from util.utils import makeMemoName
 
 
 """
@@ -78,7 +79,7 @@ class Memo(object):
             memoBuffer.deleteText(0)  # 最初の空行は削除する
 
         memoBuffer.setModified(False)
-        memoName = 'memo %d %s' % (row, self._targetBuffer.getName())
+        memoName = makeMemoName(self._targetBuffer, row)
         memoBuffer.setName(memoName)
         memoBuffer.setTag(key=ROW_TAG, tag=row)
         self.setBuffer(memoBuffer)

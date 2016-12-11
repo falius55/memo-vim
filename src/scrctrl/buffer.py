@@ -145,7 +145,7 @@ class Buffer(object):
         del self._buf[index]
 
     @checkTextChange
-    def setTextContens(self, contents):
+    def setTextContents(self, contents):
         """
         writeTextメソッドを実装したオブジェクトを渡してテキストをセットします
         """

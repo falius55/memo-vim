@@ -9,6 +9,10 @@ MEMO_BUFFER_TAG = 'memo_tag'  # メモバッファとそれ以外のバッファ
 
 ROW_TAG = 'row'  # loadするときに表示するメモが対象としている行番号をタグとしてメモバッファーに取り付ける
 
+BUFFER_TYPE = 'buffer_type'
+MEMO_CONTENTS = 'memo_contents'
+MEMO_SUMMARY = 'memo_summary'
+
 # メモの保管先ディレクトリパス
 try:
     MEMO_DIRECTORY_PATH = vim.eval('g:memo_vim_directorypath')

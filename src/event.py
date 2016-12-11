@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 from constant import MEMO_BUFFER_TAG
 from constant import ROW_TAG
+from constant import BUFFER_TYPE
+from constant import MEMO_SUMMARY
 
 
 def isMemoOpen(vim):
@@ -24,7 +26,11 @@ def isInMemoBuffer(vim):
     return currentBuffer.getTag() == MEMO_BUFFER_TAG
 
 
-def operateByState(vim, openWindow):
+def operateByState(vim, openWindow, isAlltimeOpenBuffer, isSummary):
+    """
+    isAlltimeOpenBuffer: メモウィンドウを常に表示する設定になっているかどうか
+    isSummary: 概要を表示する設定になっているかどうか(そうでなければメモ内容を表示)
+    """
     currentWindow = vim.getCurrentWindow()
     currentBuffer = currentWindow.getBuffer()
     lineNumber = currentWindow.getCursorPos()[0]
@@ -32,6 +38,13 @@ def operateByState(vim, openWindow):
     memoBuffer = vim.findByTag(MEMO_BUFFER_TAG)
 
     if isInMemoBuffer(vim):
+        return
+
+    if isAlltimeOpenBuffer:
+        if memoBuffer is None:
+            openWindow(False)
+            memoBuffer = vim.findByTag(MEMO_BUFFER_TAG)
+        alltimeOpen(isSummary, memo, memoBuffer, lineNumber)
         return
 
     if isMemoOpen(vim):
@@ -59,6 +72,21 @@ def operateByState(vim, openWindow):
             # NotMemoOpenState.toSameRow()
             # NotMemoOpenState.toMemoNotExistOnDifferenceBuffer()
             pass
+
+
+def alltimeOpen(isSummary, memo, memoBuffer, row):
+    if not isSummary and memo.hasMemo(row):
+        memo.load(row, memoBuffer)
+    else:
+        if memoBuffer.getTag(key=BUFFER_TYPE) != MEMO_SUMMARY:
+            memo.loadSummary(memoBuffer)
+        # TODO: MemoのclosestRow(row)を使って、最も位置が近いメモ概要行にカーソルを当てる
+        cursorPos = memo.indexOfKey(memo.closestRow(row)) + 1
+        if cursorPos is None:
+            return
+        print 'cursorPos', cursorPos
+        memoBuffer.findWindow().setCursorPos(cursorPos, 0)
+
 
 
 class MemoOpenState(object):

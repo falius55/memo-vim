@@ -9,6 +9,8 @@ from util.utils import makeMemoName
 
 from constant import MEMORY_PRE_TEXT
 from constant import MEMO_BUFFER_TAG
+from constant import BUFFER_TYPE
+from constant import MEMO_CONTENTS
 
 import vim
 
@@ -79,10 +81,11 @@ def writeFile(bl):
         vim.command('w')
         targetBuffer.setModified(False)
 
+
     memo = targetBuffer.getMemo()
 
     # Memoオブジェクトに変更を通知する
-    if memo.getBuffer():
+    if memo.getBuffer() and memo.getBuffer().getTag(key=BUFFER_TYPE) == MEMO_CONTENTS:
         memoBuffer = memo.getBuffer()
         targetWindow = targetBuffer.findWindow()
         row = targetWindow.getCursorPos()[0]
@@ -126,7 +129,30 @@ def movedCursor():
     """
     カーソルが移動した時、状況によってメモウィンドウを開く、変更する、閉じるなどの動作を行います
     """
-    operateByState(vimObject, openWindow)
+    # TODO: メモバッファ内でカーソルが動いてエンターキーが押されれば、その行にジャンプする機能
+    operateByState(vimObject, openWindow, _isAlltimeOpenBuffer(), isSummary)
+
+
+def _isAlltimeOpenBuffer():
+    try:
+        memoOpen = int(vim.eval('g:memo_open'))
+    except vim.error:
+        memoOpen = 0
+
+    if memoOpen == 0:
+        return False
+    elif memoOpen == 1:
+        return True
+
+
+def toggleIsSummary():
+    global isSummary
+    if isSummary:
+        isSummary = False
+    else:
+        isSummary = True
+    movedCursor()
+
 
 
 def deleteMemo(row=None):
@@ -204,4 +230,4 @@ def debug():
 
 if __name__ == '__main__':
     vimObject = globals().get('vimObject', Vim())
-    preWindow = None
+    isSummary = True

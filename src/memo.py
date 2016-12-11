@@ -6,7 +6,11 @@ import json
 import vim
 
 from constant import ROW_TAG
+from constant import BUFFER_TYPE
+from constant import MEMO_SUMMARY
+from constant import MEMO_CONTENTS
 from util.utils import makeMemoName
+from util.utils import makeSummaryName
 
 
 """
@@ -59,6 +63,11 @@ class Memo(object):
         """
         memoの内容をメモバッファから自身に取り込みます
         """
+        if memoBuffer != self.getBuffer():
+            raise ValueError('difference memoBuffer')
+        if memoBuffer.getTag(ROW_TAG) != row:
+            row = memoBuffer.getTag(ROW_TAG)
+
         memo = []
         for line in memoBuffer.elem():
             print 'keep out', line
@@ -82,7 +91,38 @@ class Memo(object):
         memoName = makeMemoName(self._targetBuffer, row)
         memoBuffer.setName(memoName)
         memoBuffer.setTag(key=ROW_TAG, tag=row)
+        memoBuffer.setTag(key=BUFFER_TYPE, tag=MEMO_CONTENTS)
         self.setBuffer(memoBuffer)
+
+    def loadSummary(self, memoBuffer):
+        memo = self._memo
+        summary = list(memo.keys())
+        summary.sort()
+        summaryList = ['%d %s' % (row, memo.get(row, [])[0]) for row in summary]
+        memoBuffer.clearText()
+        memoBuffer.appendText(summaryList)
+        if memoBuffer.getText(0) == '':
+            memoBuffer.deleteText(0)
+
+        memoBuffer.setModified(False)
+        memoBuffer.setName('summary--%s' % self._targetBuffer.getName())
+        memoBuffer.setTag(key=BUFFER_TYPE, tag=MEMO_SUMMARY)
+        summaryName = makeSummaryName(self._targetBuffer)
+        self.setBuffer(memoBuffer)
+
+    def indexOfKey(self, key):
+        summary = list(self._memo.keys())
+        summary.sort()
+        return summary.index(key)
+
+    def closestRow(self, row):
+        if self.isEmpty():
+            return None
+        keys = self._memo.keys()
+        minList = [abs(key - row) for key in keys]
+        ret = keys[minList.index(min(minList))]
+        return ret
+
 
     def saveFile(self):
         print 'open', open
@@ -138,6 +178,7 @@ class Memo(object):
     def hasMemo(self, row):
         return row in self._memo
 
+    # TODO: メモを削除した時にメモバッファが表示されている状態ならば、表示されているテキストをクリアする
     def deleteMemo(self, row):
         del self._memo[row]
 

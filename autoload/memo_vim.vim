@@ -7,6 +7,7 @@ function! memo_vim#toggle_autcmd_group() abort
         call memo_vim#set_autcmd_group(g:memo_effect)
     endif
 endfunction
+
 function! memo_vim#set_autcmd_group(bl) abort
     if a:bl > 0
         augroup MemoVim
@@ -88,4 +89,10 @@ function! memo_vim#debug_memo() abort
 python << MEMODEBUG
 debug()
 MEMODEBUG
+endfunction
+
+function! memo_vim#toggle_summary() abort
+python << TOGGLESUMMARY
+toggleIsSummary()
+TOGGLESUMMARY
 endfunction

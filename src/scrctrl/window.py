@@ -35,6 +35,9 @@ class Window(object):
     def getCursorPos(self):
         return self._window.cursor
 
+    def setCursorPos(self, row, column):
+        self._window.cursor = (row, column)
+
     def height(self, cntLine=None):
         if cntLine is None:
             return self._window.height

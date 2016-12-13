@@ -154,6 +154,11 @@ class Buffer(object):
     def getRowLen(self):
         return len(self._buf)
 
+    def isEmpty(self):
+        if self.getRowLen() == 0:
+            return True
+        return self.getRowLen() == 1 and self.getText(0).lstrip() == ''
+
     def isModified(self):
         """
         テキストが変更されたのかどうか([＋]がついているかどうか)

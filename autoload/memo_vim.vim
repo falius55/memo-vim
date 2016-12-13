@@ -31,12 +31,6 @@ openWindow()
 OPENMEMO
 endfunction
 
-function! memo_vim#leave_and_keepout() abort
-python << LEAVEMEMO
-leave()
-LEAVEMEMO
-endfunction
-
 function! memo_vim#update_memo_position() abort
 python << UPDATEPOSITION
 updateMemoPosition()

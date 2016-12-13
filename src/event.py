@@ -5,6 +5,12 @@ from constant import ROW_TAG
 from constant import BUFFER_TYPE
 from constant import MEMO_SUMMARY
 
+from constant import MEMO_CONTENTS
+from scrctrl.window import Window, Position
+from constant import MEMORY_PRE_TEXT
+from textdiff import DiffParser
+import vim
+
 
 def isMemoOpen(vim):
     memoBuffer = vim.findByTag(MEMO_BUFFER_TAG)
@@ -82,11 +88,10 @@ def alltimeOpen(isSummary, memo, memoBuffer, row):
             memo.loadSummary(memoBuffer)
         # TODO: MemoのclosestRow(row)を使って、最も位置が近いメモ概要行にカーソルを当てる
         cursorPos = memo.indexOfKey(memo.closestRow(row)) + 1
-        if cursorPos is None:
+        if cursorPos == 0:
             return
         print 'cursorPos', cursorPos
         memoBuffer.findWindow().setCursorPos(cursorPos, 0)
-
 
 
 class MemoOpenState(object):
@@ -97,8 +102,6 @@ class MemoOpenState(object):
 
     @staticmethod
     def toMemoNotExistOnSameBuffer(memo, memoBuffer):
-        # if memo.getBuffer():
-            # TODO:ここでのif文は上のisMemoOpen()が誤った結果を返してしまう可能性によるもの。解決できれば外してもいい。このファイル内の他の箇所にある同部分に関しても同様
         memoBuffer.finish()
         memo.setBuffer(None)
 
@@ -161,3 +164,197 @@ class InMemoState(object):
 
     def toDefferenceTargetBuffer(self):
         pass
+
+
+class WindowState(object):
+
+    def __init__(self, vim):
+        self._vim = vim
+
+    def open(self, moveActive=True):
+        """
+        メモウィンドウを開く処理(openコマンド)
+        """
+        vimObject = self._vim
+        window = vimObject.getCurrentWindow()
+        row = window.getCursorPos()[0]
+        buffer = window.getBuffer()
+        if buffer.getTag(BUFFER_TYPE) == MEMO_BUFFER_TAG:
+            buffer = self.findTargetBufferFrom(buffer)
+        Opener(vimObject, buffer).openContent(row, moveActive)
+
+    def writeFile(self, bl):
+        print 'write file'
+        vimObject = self._vim
+        currentBuffer = vimObject.getCurrentWindow().getBuffer()
+        if currentBuffer.getTag() == MEMO_BUFFER_TAG:
+            memoBuffer = currentBuffer
+            targetBuffer = self.findTargetBufferFrom(memoBuffer)
+        else:
+            targetBuffer = currentBuffer
+
+        if bl:
+            targetBuffer.findWindow().move()
+            vim.command('w')
+            targetBuffer.setModified(False)
+
+        memo = targetBuffer.getMemo()
+
+        # Memoオブジェクトに変更を通知する
+        if memo.getBuffer() and memo.getBuffer().getTag(key=BUFFER_TYPE) == MEMO_CONTENTS:
+            memoBuffer = memo.getBuffer()
+            targetWindow = targetBuffer.findWindow()
+            row = targetWindow.getCursorPos()[0]
+            memo.keepOut(row, memoBuffer)
+            memoBuffer.setModified(False)
+
+        if memo.isEmpty():
+            return
+
+        memo.saveFile()
+
+    def updateMemoPosition(self):
+        vimObject = self._vim
+        currentBuffer = vimObject.getCurrentWindow().getBuffer()
+        memo = currentBuffer.getMemo()
+
+        if currentBuffer.getTag() == MEMO_BUFFER_TAG:
+            return
+
+        currentTextList = currentBuffer.getContentsList()
+        preTextList = currentBuffer.getTag(key=MEMORY_PRE_TEXT, defaultIfNotFound=currentTextList)
+
+        DiffParser(preTextList, currentTextList).start(
+            addRowFunc=memo.notifyAddRow, deleteRowFunc=memo.notifyDeleteRow)
+
+        currentBuffer.setTag(key=MEMORY_PRE_TEXT, tag=currentTextList)
+
+    def deleteMemo(self, row=None):
+        vimObject = self._vim
+        currentBuffer = vimObject.getCurrentWindow().getBuffer()
+        if currentBuffer.getTag() == MEMO_BUFFER_TAG:
+            targetBuffer = self.findTargetBufferFrom(currentBuffer)
+            memo = targetBuffer.getMemo()
+            memo.getBuffer().finish()
+            memo.setBuffer(None)
+        else:
+            targetBuffer = currentBuffer
+            memo = targetBuffer.getMemo()
+
+        if row is None:
+            row = targetBuffer.findWindow().getCursorPos()[0]
+        print 'delete memo', row
+        if memo.hasMemo(row):
+            print 'memo has'
+            memo.deleteMemo(row)
+            targetBuffer.findWindow().move()
+
+    def moveMemo(self, fromRow=None, toRow=None):
+        vimObject = self._vim
+        currentBuffer = vimObject.getCurrentWindow().getBuffer()
+        if currentBuffer.getTag() == MEMO_BUFFER_TAG:
+            targetBuffer = self.findTargetBufferFrom(currentBuffer)
+            memo = targetBuffer.getMemo()
+            memo.getBuffer().finish()
+            memo.setBuffer(None)
+        else:
+            targetBuffer = currentBuffer
+            memo = targetBuffer.getMemo()
+
+        if fromRow is None:
+            fromRow = targetBuffer.findWindow().getCursorPos()[0]
+
+        memo.moveMemo(fromRow, toRow)
+        targetBuffer.findWindow().move()
+
+    def movedCursor(self):
+        if self._isInMemoBuffer():
+            return
+
+    def findTargetBufferFrom(self, memoBuffer):
+        """
+        メモバッファーを渡すことでそのメモが対象としているテキストバッファを得られます
+        """
+        vimObject = self._vim
+        targetName = WindowState.getTargetName(memoBuffer)
+        ret = vimObject.findBufferByName(targetName)
+        if ret is not None:
+            return ret
+        raise TypeError('not found target from memo buffer')
+
+    @staticmethod
+    def getTargetName(memoBuffer):
+        """
+        拡張子のない名前を取得
+        """
+        import re
+        p = re.compile(r'[^-]+-([^-]+)-memo.*|summary--(.*)$')  # 後者はMemo.loadSummaryで定義
+        match = p.match(memoBuffer.getName())
+        if match:
+            return match.group(match.lastindex)
+        raise TypeError('not found target from memo buffer')
+
+    def _isInMemoBuffer(self):
+        currentBuffer = self._vim.getCurrentWindow().getBuffer()
+        return currentBuffer.getTag() == MEMO_BUFFER_TAG
+
+    def hasMemoHere(self):
+        pass
+
+    def _isAlltimeOpenBuffer(self):
+        try:
+            memoOpen = int(vim.eval('g:memo_open'))
+        except vim.error:
+            memoOpen = 0
+
+        if memoOpen == 0:
+            return False
+        elif memoOpen == 1:
+            return True
+
+
+class RequiredOpenState(WindowState):
+
+    def movedCursor(self):
+        pass
+
+
+class AlltimeOpenState(WindowState):
+
+    def movedCursor(self):
+        pass
+
+
+class Opener(object):
+
+    def __init__(self, vim, targetBuffer):
+        self._vim = vim
+        self._targetBuffer = targetBuffer
+        self._memo = targetBuffer.getMemo()
+
+    def openContent(self, row, moveActive=True):
+        memoBuffer = self._getMemoBuffer()
+        if memoBuffer.getTag(BUFFER_TYPE) == MEMO_CONTENTS and memoBuffer.getTag(ROW_TAG, row):
+            pass
+        else:
+            self._memo.load(row, memoBuffer)
+        if moveActive:
+            memoBuffer.findWindow().move()
+
+    def openSummary(self, moveActive=True):
+        memoBuffer = self._getMemoBuffer()
+        if memoBuffer.getTag(BUFFER_TYPE) == MEMO_SUMMARY and self._vim.findByName(WindowState.getTargetName(memoBuffer)) == self._targetBuffer:
+            pass
+        else:
+            self._memo.loadSummary(memoBuffer)
+        if moveActive:
+            memoBuffer.findWindow().move()
+
+    def _getMemoBuffer(self):
+        memoBuffer = self._vim.findByTag(MEMO_BUFFER_TAG)
+        if memoBuffer is None:
+            # メモバッファが閉じていれば、ウィンドウを作成する
+            memoWindow = Window.builder(self._vim).pos(Position.TOPPEST).size(5).bufType('acwrite').build()
+            memoBuffer = memoWindow.getBuffer()
+            memoBuffer.setTag(MEMO_BUFFER_TAG)
+        return memoBuffer

@@ -1,7 +1,11 @@
+let b:not_read = 0
+if b:not_read == 1
+    finish
+endif
 
 let g:memo_vim_directorypath = '/home/black-ubuntu/.vim/plugin/memos'  " メモを保存するディレクトリ。このディレクトリに、'対象ファイル名-memo'で保存される
-let g:memo_effect = 1  " カーソル移動でメモ行に来たら自動でメモウィンドウを開くのかどうか。１にすると自動で開き、０にすると開かない
-let g:memo_open = 1
+let g:memo_effect = 1  " カーソル移動イベントの有効無効 0:無効 1:有効
+let g:memo_open = 1  " メモウィンドウを常に開くのか、必要に応じて開くのか 0: 必要に応じて開く 1: 常に開いた状態にしておく
 
 let s:dirpath = fnamemodify(resolve(expand('<sfile>:p')), ':h')  " 関数内では書けない
 function! s:init_py() abort

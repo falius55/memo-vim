@@ -63,10 +63,15 @@ class Memo(object):
         """
         memoの内容をメモバッファから自身に取り込みます
         """
+        if memoBuffer.getTag(BUFFER_TYPE) != MEMO_CONTENTS:
+            raise ValueError('not contents buffer is not kepon out')
         if memoBuffer != self.getBuffer():
             raise ValueError('difference memoBuffer')
         if memoBuffer.getTag(ROW_TAG) != row:
             row = memoBuffer.getTag(ROW_TAG)
+        if memoBuffer.isEmpty():
+            self.deleteMemo(row)
+            return
 
         memo = []
         for line in memoBuffer.elem():
@@ -81,6 +86,8 @@ class Memo(object):
         登録されているメモ内容がなければ空文字を書き込みます
         """
         print 'load', row
+        if not isinstance(row, int):
+            raise ValueError('row is not int type')
         memoBuffer.clearText()
         memo = self._memo.get(row, [])
         memoBuffer.appendText(memo)
@@ -92,6 +99,7 @@ class Memo(object):
         memoBuffer.setName(memoName)
         memoBuffer.setTag(key=ROW_TAG, tag=row)
         memoBuffer.setTag(key=BUFFER_TYPE, tag=MEMO_CONTENTS)
+        memoBuffer.setModifiable(True)
         self.setBuffer(memoBuffer)
 
     def loadSummary(self, memoBuffer):
@@ -105,15 +113,19 @@ class Memo(object):
             memoBuffer.deleteText(0)
 
         memoBuffer.setModified(False)
-        memoBuffer.setName('summary--%s' % self._targetBuffer.getName())
-        memoBuffer.setTag(key=BUFFER_TYPE, tag=MEMO_SUMMARY)
         summaryName = makeSummaryName(self._targetBuffer)
+        memoBuffer.setName(summaryName)
+        memoBuffer.setTag(ROW_TAG, -1)
+        memoBuffer.setTag(key=BUFFER_TYPE, tag=MEMO_SUMMARY)
+        memoBuffer.setModifiable(False)
         self.setBuffer(memoBuffer)
 
     def indexOfKey(self, key):
         summary = list(self._memo.keys())
         summary.sort()
-        return summary.index(key)
+        if key in summary:
+            return summary.index(key)
+        return -1
 
     def closestRow(self, row):
         if self.isEmpty():
@@ -122,7 +134,6 @@ class Memo(object):
         minList = [abs(key - row) for key in keys]
         ret = keys[minList.index(min(minList))]
         return ret
-
 
     def saveFile(self):
         print 'open', open
@@ -180,7 +191,8 @@ class Memo(object):
 
     # TODO: メモを削除した時にメモバッファが表示されている状態ならば、表示されているテキストをクリアする
     def deleteMemo(self, row):
-        del self._memo[row]
+        if self.hasMemo(row):
+            del self._memo[row]
 
     def moveMemo(self, fromRow, toRow):
         if fromRow not in self._memo:

@@ -40,7 +40,7 @@ def checkDeadElem(func):
             if not win.isExist():
                 wvim.remove(wvim)
         for buf in wvim._buffers:
-            if not buf.isExist():
+            if not buf.isOpen():
                 wvim.remove(buf)
         for tab in wvim._tabs:
             if not tab.isExist():
@@ -122,6 +122,8 @@ class Vim(object):
         for buf in self._buffers:
             if buf.getName() == name or splitext(buf.getName())[0] == name:
                 return buf
+        else:
+            raise ValueError('not found buffer by name ' + name)
 
     def remove(self, obj):
         try:

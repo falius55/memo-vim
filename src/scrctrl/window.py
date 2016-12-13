@@ -30,7 +30,10 @@ class Window(object):
         self._tag = {}
 
     def getBuffer(self):
-        return self._vim.find(self._window.buffer)
+        ret = self._vim.find(self._window.buffer)
+        if ret is None:
+            raise ValueError('this window has no buffer')
+        return ret
 
     def getCursorPos(self):
         return self._window.cursor
@@ -145,6 +148,7 @@ class WindowBuilder(object):
         self._name = None
         self._bufType = None
         self._recycleBuffer = None
+        self._filetype = None
 
     def pos(self, pos=Position.LEFTEST):
         if Position.stringFrom(pos) is None:
@@ -180,6 +184,10 @@ class WindowBuilder(object):
         self._recycleBuffer = recycleBuffer
         return self
 
+    def fileType(self, filetype):
+        self._filetype = filetype
+        return self
+
     def build(self):
         print 'window builder build()'
         saveWindow = self._vim.getCurrentWindow()
@@ -192,6 +200,8 @@ class WindowBuilder(object):
             newBuffer.setName(self._name)
         if self._bufType is not None:
             newBuffer.setType(self._bufType)
+        if self._filetype is not None:
+            newBuffer.setFileType(self._filetype)
 
         self._setActiveWindow(self._moveActiveWindow, saveWindow)
 

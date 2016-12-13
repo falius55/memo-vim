@@ -71,20 +71,27 @@ class DiffParser(object):
         単純追加された行の行番号を一つ一つaddRowFuncに渡して実行し、
         同様にしてdeleteRowFuncとchangeRowFuncも実行します
         closeFuncは最後に一度だけ実行されます
+        closeFuncを除いた関数が一度でも実行されればTrueを返します
         """
         result = self._analyze(self._before, self._after)
+        ret = False
 
         if addRowFunc is not None:
             for rowNum in sorted(result[0]):
                 addRowFunc(rowNum)
+                ret = True
         if deleteRowFunc is not None:
             for rowNum in sorted(result[1]):
                 deleteRowFunc(rowNum)
+                ret = True
         if changeRowFunc is not None:
             for rowNum in sorted(result[2]):
                 changeRowFunc(rowNum)
+                ret = True
         if closeFunc is not None:
             closeFunc()
+
+        return ret
 
     def _analyze(self, before, after):
         """

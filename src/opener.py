@@ -7,6 +7,9 @@ from scrctrl.window import Window, Position
 
 
 class Opener(object):
+    """
+    メモウィンドウの開閉を行うクラス
+    """
 
     def __init__(self, vim, bufferManager, stateManager):
         self._vim = vim

@@ -49,7 +49,7 @@ class Tab(object):
         return self._tab.vars.get(varName, defaultIfNotFound)
 
     def getCurrentWindow(self):
-        return self._vim._find(self._tab.window)
+        return self._vim.find(self._tab.window)
 
     def __hash(self):
         return hash(self._tab)

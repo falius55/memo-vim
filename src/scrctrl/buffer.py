@@ -47,6 +47,9 @@ class Buffer(object):
         return self._buf.name
 
     def setName(self, name):
+        """
+        @throw vim.error すでに存在する名前をつけようとした場合
+        """
         self._buf.name = name
 
     def getName(self):
@@ -96,6 +99,9 @@ class Buffer(object):
 
     def getOptions(self):
         return self._buf.options
+
+    def setOption(self, optionName, value):
+        self._buf.options[optionName] = value
 
     def getVar(self, varName, defaultIfNotFound=None):
         """
@@ -240,6 +246,16 @@ class Buffer(object):
         vim.command('bd')
         self._vim.remove(window)
         self._vim.remove(self)
+
+    @saveWindow
+    def clearUndo(self):
+        self.findWindow().move()
+        vim.command('let old_undolevels = &undolevels')
+        vim.command('set undolevels=-1')
+        vim.command('exe "normal a \<BS>\<ESC>"')
+        vim.command('let &undolevels = old_undolevels')
+        vim.command('unlet old_undolevels')
+        self.setModified(False)
 
 
 class FileContents(object):

@@ -5,6 +5,9 @@ from constant import MEMO_BUFFER_TAG
 
 
 class BufferManager(object):
+    """
+    バッファオブジェクトの取得をサポートするクラス
+    """
 
     def __init__(self, vim):
         self._vim = vim
@@ -50,7 +53,7 @@ class BufferManager(object):
     @staticmethod
     def getTargetName(memoBuffer):
         """
-        拡張子がある場合とない場合がある
+        拡張子がある場合とない場合があるので注意
         """
         import re
         p = re.compile(r'[^-]+-([^-]+)-memo.*|summary--(.*)$')  # 後者はMemo.loadSummaryで定義

@@ -90,3 +90,9 @@ python << TOGGLESUMMARY
 toggleIsSummary()
 TOGGLESUMMARY
 endfunction
+
+function! memo_vim#tab_leave() abort
+python << TABLEAVED
+tabLeaved()
+TABLEAVED
+endfunction

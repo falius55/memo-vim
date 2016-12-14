@@ -13,12 +13,10 @@ from util.utils import makeMemoName
 from util.utils import makeSummaryName
 
 
-"""
-一つのファイルに対するメモをまとめて管理するクラスです
-"""
-
-
 class Memo(object):
+    """
+    一つのファイルに対するメモをまとめて管理するクラスです
+    """
 
     def __init__(self, targetBuffer, savePath=None):
         """
@@ -100,6 +98,10 @@ class Memo(object):
         memoBuffer.setTag(key=ROW_TAG, tag=row)
         memoBuffer.setTag(key=BUFFER_TYPE, tag=MEMO_CONTENTS)
         memoBuffer.setModifiable(True)
+        memoBuffer.setFileType('memo_vim_content')
+        memoBuffer.setType('acwrite')
+        memoBuffer.setOption('swapfile', False)
+        memoBuffer.clearUndo()
         self.setBuffer(memoBuffer)
 
     def loadSummary(self, memoBuffer):
@@ -114,10 +116,15 @@ class Memo(object):
 
         memoBuffer.setModified(False)
         summaryName = makeSummaryName(self._targetBuffer)
-        memoBuffer.setName(summaryName)
+        try:
+            memoBuffer.setName(summaryName)
+        except vim.error:
+            print 'すでにある名前', summaryName
         memoBuffer.setTag(ROW_TAG, -1)
         memoBuffer.setTag(key=BUFFER_TYPE, tag=MEMO_SUMMARY)
         memoBuffer.setModifiable(False)
+        memoBuffer.setFileType('memo_vim_summary')
+        memoBuffer.setType('nofile')
         self.setBuffer(memoBuffer)
 
     def indexOfKey(self, key):

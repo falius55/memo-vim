@@ -60,12 +60,17 @@ def initBuffer():
     operator.initBuffer()
 
 
+def tabLeaved():
+    operator.tabLeaved()
+
+
 def debug():
     try:
         print 'Buffer() list', [e.getName() for e in vimObject._buffers]
     except vim.error:
         print 'vim.error'
     print 'buffer elems', [e.name for e in vim.buffers]
+    print 'buffer tags', [e.getTag() for e in vimObject._buffers]
 
 
 if __name__ == '__main__':

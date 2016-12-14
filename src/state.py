@@ -11,6 +11,9 @@ import vim
 
 
 class StateManager(object):
+    """
+    設定も含めた現在の状況を管理するクラス
+    """
 
     def __init__(self, bufferManager):
         self._bufferManager = bufferManager

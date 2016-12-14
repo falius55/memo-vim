@@ -12,13 +12,16 @@ from constant import MEMORY_PRE_TEXT
 
 
 class Operator(object):
+    """
+    操作を管理するクラス
+    基本的にvim上のコマンドやオートコマンドに対応するメソッドを持つ
+    """
 
     def __init__(self, vim):
         self._vim = vim
         self._bufferManager = BufferManager(vim)
         self._state = StateManager(self._bufferManager)
         self._opener = Opener(vim, self._bufferManager, self._state)
-        # self._cursorListener = CursorListener(self._stateManager, self._opener)
 
     def open(self):
         row = self._state.currentTargetLineNumber()
@@ -87,6 +90,10 @@ class Operator(object):
             return
         targetBuffer = self._bufferManager.getCurrentBuffer()
         targetBuffer.setTag(MEMORY_PRE_TEXT, targetBuffer.getContentsList())
+
+    def tabLeaved(self):
+        print 'tab leave'
+        self._opener.close()
 
 
 print 'readed operator'

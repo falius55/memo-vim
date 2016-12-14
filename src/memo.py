@@ -73,17 +73,14 @@ class Memo(object):
 
         memo = []
         for line in memoBuffer.elem():
-            print 'keep out', line
             memo.append(line)
         self._memo[row] = memo
-        print self._memo, row
 
     def load(self, row, memoBuffer):
         """
         指定行のメモ内容をメモバッファに書き込みます
         登録されているメモ内容がなければ空文字を書き込みます
         """
-        print 'load', row
         if not isinstance(row, int):
             raise ValueError('row is not int type')
         memoBuffer.clearText()
@@ -101,6 +98,7 @@ class Memo(object):
         memoBuffer.setFileType('memo_vim_content')
         memoBuffer.setType('acwrite')
         memoBuffer.setOption('swapfile', False)
+        memoBuffer.findWindow().setOption('number', True)
         memoBuffer.clearUndo()
         self.setBuffer(memoBuffer)
 
@@ -108,7 +106,7 @@ class Memo(object):
         memo = self._memo
         summary = list(memo.keys())
         summary.sort()
-        summaryList = ['%d %s' % (row, memo.get(row, [])[0]) for row in summary]
+        summaryList = [('[%d]' % row).ljust(6, ' ') + ' -- %s' % memo.get(row, [])[0] for row in summary]
         memoBuffer.clearText()
         memoBuffer.appendText(summaryList)
         if memoBuffer.getText(0) == '':
@@ -125,6 +123,7 @@ class Memo(object):
         memoBuffer.setModifiable(False)
         memoBuffer.setFileType('memo_vim_summary')
         memoBuffer.setType('nofile')
+        memoBuffer.findWindow().setOption('number', False)
         self.setBuffer(memoBuffer)
 
     def indexOfKey(self, key):
@@ -143,11 +142,9 @@ class Memo(object):
         return ret
 
     def saveFile(self):
-        print 'open', open
         jsonString = json.dumps(self._memo)
         with open(self._saveFilePath, 'w') as f:
             f.write(jsonString)
-        print 'saved to', self._saveFilePath
 
     def notifyDeleteRow(self, row):
         memo = self._memo
@@ -169,14 +166,11 @@ class Memo(object):
                 content = memo[key]
                 del memo[key]
                 memo[key + 1] = content
-                print 'new key', (key + 1)
             else:
                 break
 
     def _readFile(self, saveFilePath):
-        print 'saveFilePath in _readFile', saveFilePath
         if not path.exists(saveFilePath):
-            print 'filepath no exist'
             return {}
 
         with open(saveFilePath, 'r') as f:
@@ -186,7 +180,6 @@ class Memo(object):
         readObject = json.loads(jsonString)
         for key in readObject:
             ret[int(key)] = readObject[key]  # jsonから読み込むとキーが文字列になっているので整数に変換
-        print 'keys in _readFile', ret.keys()
         return ret
 
     def deleteFile(self):

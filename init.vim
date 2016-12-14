@@ -5,7 +5,7 @@ endif
 
 let g:memo_vim_directorypath = '/home/black-ubuntu/.vim/plugin/memos'  " メモを保存するディレクトリ。このディレクトリに、'対象ファイル名-memo'で保存される
 let g:memo_effect = 1  " カーソル移動イベントの有効無効 0:無効 1:有効
-let g:memo_open = 1  " メモウィンドウを常に開くのか、必要に応じて開くのか 0: 必要に応じて開く 1: 常に開いた状態にしておく
+let g:memo_open = 2  " メモウィンドウの設定 0:全く開かない 1: 必要に応じて開く 2: 常に開いた状態にしておく
 
 let s:dirpath = fnamemodify(resolve(expand('<sfile>:p')), ':h')  " 関数内では書けない
 function! s:init_py() abort
@@ -28,7 +28,7 @@ command! UpdatePositon call memo_vim#update_memo_position()
 
 command! SaveMemo call memo_vim#write_to_file(0)
 
-command! ToggleMemoVim call memo_vim#toggle_autcmd_group()
+command! ToggleMemoVim call memo_vim#toggle_memo()
 
 command! ToggleSummary call memo_vim#toggle_summary()
 
@@ -37,6 +37,8 @@ command! -nargs=? DeleteMemo call memo_vim#delete_memo(<args>)
 command! -nargs=+ MoveMemo call memo_vim#move_memo(<f-args>)
 
 command! DebugMemo call memo_vim#debug_memo()
+
+command! CloseMemo call memo_vim#memo_close()
 
 autocmd! TextChanged * call memo_vim#update_memo_position()
 
@@ -51,7 +53,6 @@ autocmd! BufWinLeave * call memo_vim#write_to_file(0)  " バッファが破棄�
 autocmd! BufRead * call memo_vim#init_buffer()
 
 autocmd! TabLeave * call memo_vim#tab_leave()
-
 
 
 call memo_vim#set_autcmd_group(g:memo_effect)

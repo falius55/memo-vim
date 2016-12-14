@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 from memo import Memo
 from util.utils import saveWindow
-from textdiff import DiffParser
 from constant import MEMO_DIRECTORY_PATH
 
 import vim
@@ -34,7 +33,6 @@ class Buffer(object):
     DEFAULT_KEY = 'default_key'
 
     def __init__(self, buf, vim):
-        print 'Buffer() create', buf.name
         self._buf = buf
         self._vim = vim
         self._tag = {}
@@ -214,12 +212,6 @@ class Buffer(object):
     def getContentsList(self):
         return [line for line in self._buf]
 
-    def isChanged(self):
-        if not hasattr(self, '_contents'):
-            print 'no _contens'
-            return
-        DiffParser(self._contents, self._buf, test=True)
-
     def __eq__(self, another):
         """
         vim標準との比較でも、同じバッファを指していればTrueを返す
@@ -240,6 +232,7 @@ class Buffer(object):
     def finish(self):
         window = self.findWindow()
         if window is None:
+            self._vim.remove(self)
             return
 
         window.move()

@@ -6,14 +6,18 @@ from vimoperator import Operator
 import vim
 
 
-def openWindow(moveActive=True):
+def openMemoWindow(moveActive=True):
     """
     メモウィンドウを開く処理
     """
-    operator.open()
+    operator.openContent()
 
 
-def writeFile(bl):
+def closeMemo():
+    operator.close()
+
+
+def writeMemoFile(bl):
     """
     ウィンドウを移動した時、編集ファイルが保存された時に、メモ内容もファイルに保存する
     """
@@ -37,6 +41,10 @@ def movedCursor():
 
 def toggleIsSummary():
     operator.toggleSummaryOrContent()
+
+
+def toggleMemo():
+    operator.toggleMemo()
 
 
 def deleteMemo(row=None):
@@ -64,7 +72,7 @@ def tabLeaved():
     operator.tabLeaved()
 
 
-def debug():
+def debugMemo():
     try:
         print 'Buffer() list', [e.getName() for e in vimObject._buffers]
     except vim.error:

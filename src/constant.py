@@ -18,3 +18,6 @@ try:
     MEMO_DIRECTORY_PATH = vim.eval('g:memo_vim_directorypath')
 except vim.error:
     MEMO_DIRECTORY_PATH = None  # 変数が定義されていない
+
+# ウィンドウの設定変数名
+MEMO_OPEN = 'memo_open'

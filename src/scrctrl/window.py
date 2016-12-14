@@ -66,6 +66,12 @@ class Window(object):
             return self._window.vars.get(varName)
         return self._window.vars.get(varName, defaultIfNotFound)
 
+    def setOption(self, optionName, value):
+        self._window.options[optionName] = value
+
+    def getOption(self, optionName):
+        return self._window.options[optionName]
+
     def getNumber(self):
         """
         ウィンドウ番号。ウィンドウが削除されれば番号は詰められ、必ず各ウィンドウの番号は連番となる
@@ -93,12 +99,13 @@ class Window(object):
 
     def move(self):
         """
-        このウィンドウにカーソルを移動する
+        このウィンドウにカーソルを移動します
+        この移動でautocmdは発火しません
         このウィンドウがすでになければ削除処理のみ行って見た目には何もしない
         """
         try:
             number = self.getNumber()
-            vim.command('%d wincmd w' % number)
+            vim.command('noautocmd %d wincmd w' % number)  # noautocmdをつけないと、関数の一連の処理の途中でmove()を使った場合にイベント処理が容赦なく割り込んできて想定外の動きとなってしまうことが多い
         except vim.error:
             # すでに削除されたウィンドウにアクセスしようとした場合
             # 自身の参照を取り除いて続行する
@@ -149,6 +156,7 @@ class WindowBuilder(object):
         self._bufType = None
         self._recycleBuffer = None
         self._filetype = None
+        self._tag = None
 
     def pos(self, pos=Position.LEFTEST):
         if Position.stringFrom(pos) is None:
@@ -188,8 +196,14 @@ class WindowBuilder(object):
         self._filetype = filetype
         return self
 
+    def tag(self, tag):
+        """
+        デフォルトのタグをつけます
+        """
+        self._tag = tag
+        return self
+
     def build(self):
-        print 'window builder build()'
         saveWindow = self._vim.getCurrentWindow()
 
         newWindow = self._createWindow()
@@ -202,6 +216,8 @@ class WindowBuilder(object):
             newBuffer.setType(self._bufType)
         if self._filetype is not None:
             newBuffer.setFileType(self._filetype)
+        if self._tag is not None:
+            newBuffer.setTag(self._tag)
 
         self._setActiveWindow(self._moveActiveWindow, saveWindow)
 
@@ -211,21 +227,21 @@ class WindowBuilder(object):
 
     def _createWindow(self):
         if self._pos == Position.TOPPEST:
-            vim.command('topleft ' + self._argCommand(False, self._recycleBuffer))
+            vim.command('noautocmd topleft ' + self._argCommand(False, self._recycleBuffer))  # 画面分割でもcursorMovedイベントは発火してしまうため、noautocmdで抑制する
         elif self._pos == Position.LEFTEST:
-            vim.command('topleft ' + self._argCommand(True, self._recycleBuffer))
+            vim.command('noautocmd topleft ' + self._argCommand(True, self._recycleBuffer))
         elif self._pos == Position.RIGHTEST:
-            vim.command('botright ' + self._argCommand(True, self._recycleBuffer))
+            vim.command('noautocmd botright ' + self._argCommand(True, self._recycleBuffer))
         elif self._pos == Position.DOWNEST:
-            vim.command('botright ' + self._argCommand(False, self._recycleBuffer))
+            vim.command('noautocmd botright ' + self._argCommand(False, self._recycleBuffer))
         elif self._pos == Position.TOP:
-            vim.command('aboveleft ' + self._argCommand(False, self._recycleBuffer))
+            vim.command('noautocmd aboveleft ' + self._argCommand(False, self._recycleBuffer))
         elif self._pos == Position.LEFT:
-            vim.command('aboveleft ' + self._argCommand(True, self._recycleBuffer))
+            vim.command('noautocmd aboveleft ' + self._argCommand(True, self._recycleBuffer))
         elif self._pos == Position.RIGHT:
-            vim.command('belowright ' + self._argCommand(True, self._recycleBuffer))
+            vim.command('noautocmd belowright ' + self._argCommand(True, self._recycleBuffer))
         elif self._pos == Position.DOWN:
-            vim.command('belowright ' + self._argCommand(False, self._recycleBuffer))
+            vim.command('noautocmd belowright ' + self._argCommand(False, self._recycleBuffer))
         newWindow = self._keepUpVim()
         return newWindow
 
@@ -246,7 +262,6 @@ class WindowBuilder(object):
         VimオブジェクトにWindowとBufferを追加する
         """
         newBufElem = self._findLatestBufferElem()
-        print 'keepup with memo buffer creating'
         newBuffer = Buffer(newBufElem, self._vim)
         self._vim.appendBuffer(newBuffer)
 
@@ -271,10 +286,8 @@ class WindowBuilder(object):
 
         if Position.contains(self._pos, setableHeight):
             window.height(size)
-            print 'height setable'
         elif Position.contains(self._pos, setableWidth):
             window.width(size)
-            print 'width setable'
 
     def _setActiveWindow(self, move, saveWindow):
         if move:

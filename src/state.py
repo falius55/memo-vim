@@ -6,6 +6,7 @@ from constant import BUFFER_TYPE
 from constant import MEMO_CONTENTS
 from constant import MEMO_SUMMARY
 from constant import ROW_TAG
+from constant import MEMO_OPEN
 
 import vim
 
@@ -68,15 +69,23 @@ class StateManager(object):
             self._isSummary = True
 
     def isAlltimeMemoWindow(self):
-        try:
-            memoOpen = int(vim.eval('g:memo_open'))
-        except vim.error:
-            memoOpen = 0
+        memoOpen = vim.vars.get(MEMO_OPEN, 0)
 
-        if memoOpen == 0:
-            return False
-        elif memoOpen == 1:
+        if memoOpen == 2:
             return True
+        return False
 
     def isRequiredMemoWindow(self):
-        return not self.isAlltimeMemoWindow()
+        memoOpen = vim.vars.get(MEMO_OPEN, 0)
+        if memoOpen == 1:
+            return True
+        return False
+
+    def isInvalid(self):
+        memoOpen = vim.vars.get(MEMO_OPEN, 0)
+        if memoOpen == 0:
+            return True
+        return False
+
+    def openConf(self):
+        return vim.vars.get(MEMO_OPEN)

@@ -26,7 +26,6 @@ def checkActiveElem(func):
             buffers = wvim._buffers
             for bufElem in vim.buffers:
                 if bufElem not in buffers:
-                    print 'checkElem decolator appendBuffer'
                     wvim.appendBuffer(Buffer(bufElem, wvim))
             result = func(self, *args, **kwargs)
         return result
@@ -53,7 +52,6 @@ def checkDeadElem(func):
 class Vim(object):
 
     def __init__(self):
-        print 'Vim() create'
         self._initBuffer()
         self._initWindow()
         self._initTab()
@@ -78,13 +76,16 @@ class Vim(object):
 
     def getGlobalVar(self, varName, defaultIfNotFound=None):
         if defaultIfNotFound is None:
-            return vim.vars(varName)
-        return vim.vars(varName, defaultIfNotFound)
+            return vim.vars.get(varName)
+        return vim.vars.get(varName, defaultIfNotFound)
+
+    def setGlobalVar(self, varName, value):
+        vim.vars[varName] = value
 
     def getVimVar(self, varName, defaultIfNotFound=None):
         if defaultIfNotFound is None:
-            return vim.vvars(varName)
-        return vim.vvars(varName, defaultIfNotFound)
+            return vim.vvars.get(varName)
+        return vim.vvars.get(varName, defaultIfNotFound)
 
     def bufferFromIndex(self, index):
         return self._buffers[index]
@@ -138,11 +139,9 @@ class Vim(object):
             pass
 
     def appendBuffer(self, buffer):
-        print 'append buffer'
         self._buffers.append(buffer)
 
     def appendWindow(self, window):
-        print 'append window'
         self._windows.append(window)
 
     def __hash(self):

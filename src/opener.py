@@ -1,7 +1,5 @@
 #!/usr/bin/python3.4
 # -*- coding: utf-8 -*-
-
-from constant import ROW_TAG
 from constant import MEMO_BUFFER_TAG
 from scrctrl.window import Window, Position
 
@@ -21,24 +19,24 @@ class Opener(object):
         設定や現在位置によって自動で開閉を決定する
         カーソル位置は動かない
         """
-        cursorSave = self._state.isInMemoBuffer()
+        isInMemo = self._state.isInMemoBuffer()  # もし処理途中でウィンドウを閉じてしまっても大丈夫なように、メモウィンドウ内にカーソルがある場合は覚えておく
 
         if self._state.isAlltimeMemoWindow():
             self._autoOnAlltime()
-        else:
+        elif self._state.isRequiredMemoWindow():
             self._autoOnRequired()
+        elif self._state.isInvalid() and self._state.isMemoOpened():
+            self.close()
 
-        if cursorSave:
+        if isInMemo:
             self._bufferManager.getTopMemoBuffer().findWindow().move()
 
     def openContent(self, row, moveActive=True):
-        print 'open content', row
         if not isinstance(row, int):
             raise ValueError('row is needed int type')
         targetBuffer = self._bufferManager.getCurrentTargetBuffer()
         memo = targetBuffer.getMemo()
         memoBuffer = self._openWindow()
-        print 'row tag', memoBuffer.getTag(ROW_TAG)
 
         if self._state.isContentMemoOpened(row):
             pass
@@ -92,8 +90,7 @@ class Opener(object):
         """
         memoBuffer = self._bufferManager.getTopMemoBuffer()
         if memoBuffer is None:
-            print 'new create window'
-            memoWindow = Window.builder(self._vim).pos(Position.TOPPEST).moveActiveWindow(False).size(5).fileType('memo_vim').bufType('acwrite').build()
+            memoWindow = Window.builder(self._vim).pos(Position.TOPPEST).moveActiveWindow(False).size(5).fileType('memo_vim').bufType('acwrite').tag(MEMO_BUFFER_TAG).build()
             memoBuffer = memoWindow.getBuffer()
-            memoBuffer.setTag(MEMO_BUFFER_TAG)
+
         return memoBuffer

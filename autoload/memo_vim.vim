@@ -27,7 +27,7 @@ endfunction
 
 function! memo_vim#open_window() abort
 python << OPENMEMO
-openWindow()
+openMemoWindow()
 OPENMEMO
 endfunction
 
@@ -44,6 +44,7 @@ DELETEBUFFER
 endfunction
 
 function! memo_vim#moved_cursor() abort
+    echo "moved cursor"
 python << MOVEDCURSOR
 movedCursor()
 MOVEDCURSOR
@@ -51,7 +52,7 @@ endfunction
 
 function! memo_vim#write_to_file(bl) abort
 python << SAVEFILE
-writeFile(int(vim.eval('a:bl')) != 0)
+writeMemoFile(int(vim.eval('a:bl')) != 0)
 SAVEFILE
 endfunction
 
@@ -81,8 +82,14 @@ endfunction
 
 function! memo_vim#debug_memo() abort
 python << MEMODEBUG
-debug()
+debugMemo()
 MEMODEBUG
+endfunction
+
+function! memo_vim#toggle_memo() abort
+python << TOGGLEMEMO
+toggleMemo()
+TOGGLEMEMO
 endfunction
 
 function! memo_vim#toggle_summary() abort
@@ -95,4 +102,10 @@ function! memo_vim#tab_leave() abort
 python << TABLEAVED
 tabLeaved()
 TABLEAVED
+endfunction
+
+function! memo_vim#memo_close() abort
+python << MEMOCLOSE
+closeMemo()
+MEMOCLOSE
 endfunction

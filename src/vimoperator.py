@@ -9,6 +9,7 @@ from opener import Opener
 from textdiff import DiffParser
 
 from constant import MEMORY_PRE_TEXT
+from constant import MEMO_OPEN
 
 
 class Operator(object):
@@ -23,7 +24,7 @@ class Operator(object):
         self._state = StateManager(self._bufferManager)
         self._opener = Opener(vim, self._bufferManager, self._state)
 
-    def open(self):
+    def openContent(self):
         row = self._state.currentTargetLineNumber()
         self._opener.openContent(row)
 
@@ -92,10 +93,25 @@ class Operator(object):
         targetBuffer.setTag(MEMORY_PRE_TEXT, targetBuffer.getContentsList())
 
     def tabLeaved(self):
-        print 'tab leave'
+        self._opener.close()
+
+    def toggleMemo(self):
+        """
+        メモウィンドウの有効無効を切り替える。これは'常にウィンドウを開く'と'ウィンドウを全く開かない'のトグルなので、必要に応じて開く設定にはならない
+        """
+        if self._vim.getGlobalVar(MEMO_OPEN, 0) == 0:
+            self._vim.setGlobalVar(MEMO_OPEN, 2)
+        else:
+            self._vim.setGlobalVar(MEMO_OPEN, 0)
+        self._opener.auto()
+
+    def open(self):
+        self._opener.auto()
+
+    def close(self):
+        self._vim.setGlobalVar(MEMO_OPEN, 0)
         self._opener.close()
 
 
-print 'readed operator'
 if __name__ == '__main__':
     print 'readed'

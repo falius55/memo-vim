@@ -66,7 +66,7 @@ class Memo(object):
         memoの内容をメモバッファから自身に取り込みます
         """
         # if memoBuffer.getTag(BUFFER_TYPE) != MEMO_CONTENTS:
-        if not memoBuffer.isContent():
+        if not memoBuffer.isContents():
             raise ValueError('not contents buffer is not kepon out')
         if memoBuffer != self.getBuffer():
             raise ValueError('difference memoBuffer')

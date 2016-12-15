@@ -25,6 +25,7 @@ class Window(object):
     DEFAULT_KEY = 'default_key'
 
     def __init__(self, window, vim):
+        vim.appendWindow(self)
         self._window = window
         self._vim = vim
         self._tag = {}
@@ -148,7 +149,7 @@ class WindowBuilder(object):
 
     def __init__(self, vim, bufClass=None):
         if not issubclass(bufClass, Buffer):
-            raise ValueError(str(bufClass) + ' is not instance of Buffer')
+            raise ValueError(str(bufClass) + ' is not subclass of Buffer')
         self._vim = vim
         self._pos = Position.LEFTEST
         self._size = 30
@@ -267,14 +268,12 @@ class WindowBuilder(object):
         """
         newBufElem = self._findLatestBufferElem()
         if self._bufClass:
-            newBuffer = self._bufClass(newBufElem, self._vim)
+            self._bufClass(newBufElem, self._vim)
         else:
-            newBuffer = self._vim.newBuffer(newBufElem)
-        self._vim.appendBuffer(newBuffer)
+            self._vim.newBuffer(newBufElem)
 
         newWinElem = self._findWindowElemFromBufferElem(newBufElem)
         newWindow = self._vim.newWindow(newWinElem)
-        self._vim.appendWindow(newWindow)
         return newWindow
 
     def _findLatestBufferElem(self):

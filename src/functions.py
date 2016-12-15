@@ -13,6 +13,10 @@ def openMemoWindow(moveActive=True):
     operator.openContent()
 
 
+def leaveMemo():
+    operator.leave()
+
+
 def closeMemo():
     operator.close()
 
@@ -74,6 +78,11 @@ def tabLeaved():
 
 def jumpSummary():
     operator.jumpSummary()
+
+
+def clickSummary():
+    print 'click summary'
+    operator.clickSummary()
 
 
 def nextMemo():

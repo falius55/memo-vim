@@ -9,6 +9,9 @@ from constant import ROW_TAG
 from util.utils import makeMemoName
 from util.utils import makeSummaryName
 from memo import Memo
+from util.utils import saveWindow
+
+import vim
 
 class TextBuffer(Buffer):
 
@@ -33,11 +36,17 @@ class MemoBuffer(Buffer):
         self.setTag(MEMO_BUFFER_TAG)
         self._type = None
         self._row = None
+        self._initMappings()
+
+    @saveWindow
+    def _initMappings(self):
+        self.findWindow().move()
+        vim.command('call memovim#mappings#set_memo_mappings()')
 
     def isMemoBuffer(self):
         return True
 
-    def isTargetBuffer(self):
+    def isTextBuffer(self):
         return False
 
     def isContents(self):
@@ -49,6 +58,7 @@ class MemoBuffer(Buffer):
     def row(self):
         return self._row
 
+    @saveWindow
     def loadContent(self, memo, row):
         if not isinstance(row, int):
             raise ValueError('row is not int type')
@@ -70,6 +80,8 @@ class MemoBuffer(Buffer):
         self.clearUndo()
         memo.setBuffer(self)
 
+        self._initContentMappings()
+
     def loadSummary(self, memo):
         summary = memo.summary()
         self.clearText()
@@ -90,3 +102,17 @@ class MemoBuffer(Buffer):
         self.setOption('swapfile', False)
         self.findWindow().setOption('number', False)
         memo.setBuffer(self)
+
+        self._initSummaryMappings()
+
+    @saveWindow
+    def _initSummaryMappings(self):
+        self.findWindow().move()
+        vim.command('call memovim#mappings#unset_content_mappings()')
+        vim.command('call memovim#mappings#set_summary_mappings()')
+
+    @saveWindow
+    def _initContentMappings(self):
+        self.findWindow().move()
+        vim.command('call memovim#mappings#unset_summary_mappings()')
+        vim.command('call memovim#mappings#set_content_mappings()')

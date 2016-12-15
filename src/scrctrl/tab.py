@@ -7,6 +7,7 @@ class Tab(object):
     DEFAULT_KEY = 'default_key'
 
     def __init__(self, tab, vim):
+        vim.appendTab(self)
         self._tab = tab
         self._vim = vim
         self._tag = {}

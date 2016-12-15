@@ -31,6 +31,12 @@ openMemoWindow()
 OPENMEMO
 endfunction
 
+function! memo_vim#leave_memo() abort
+python << LEAVEMEMO
+leaveMemo()
+LEAVEMEMO
+endfunction
+
 function! memo_vim#update_memo_position() abort
 python << UPDATEPOSITION
 updateMemoPosition()
@@ -109,7 +115,7 @@ closeMemo()
 MEMOCLOSE
 endfunction
 
-function! memo_vim#summary_click() abort
+function! memo_vim#summary_jump() abort
 python << SUMMARTCLICK
 jumpSummary()
 SUMMARTCLICK

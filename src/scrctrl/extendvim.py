@@ -22,15 +22,15 @@ def checkActiveElem(func):
             windows = wvim._windows
             for winElem in vim.windows:
                 if winElem not in windows:
-                    wvim.appendWindow(wvim.newWindow(winElem))
+                    wvim.newWindow(winElem)
             buffers = wvim._buffers
             for bufElem in vim.buffers:
                 if bufElem not in buffers:
-                    wvim.appendBuffer(wvim.newBuffer(bufElem))
+                    wvim.newBuffer(bufElem)
             tabs = wvim._tabs
             for tabElem in vim.tabpages:
                 if tabElem not in tabs:
-                    wvim.appendTab(wvim.newTab(tabElem))
+                    wvim.newTab(tabElem)
             result = func(self, *args, **kwargs)
         return result
     return wrapper
@@ -56,36 +56,27 @@ def checkDeadElem(func):
 class Vim(object):
 
     def __init__(self):
-        self._buffers = self._initBuffer()
-        self._windows = self._initWindow()
-        self._tabs = self._initTab()
+        self._buffers = []
+        self._windows = []
+        self._tabs = []
 
     def _initBuffer(self):
-        buffers = []
         for buf in vim.buffers:
-            buffers.append(self.newBuffer(buf))
-        # self._buffers = buffers
-        return buffers
+            self.newBuffer(buf)
 
     def newBuffer(self, elem):
         return Buffer(elem, self)
 
     def _initWindow(self):
-        windows = []
         for win in vim.windows:
-            windows.append(self.newWindow(win))
-        # self._windows = windows
-        return windows
+            self.newWindow(win)
 
     def newWindow(self, elem):
         return Window(elem, self)
 
     def _initTab(self):
-        tabs = []
         for tab in vim.tabpages:
-            tabs.append(self.newTab(tab))
-        # self._tabs = tabs
-        return tabs
+            self.newTab(tab)
 
     def newTab(self, elem):
         return Tab(elem, self)

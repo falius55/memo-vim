@@ -28,12 +28,18 @@ class Operator(object):
         row = self._state.currentTargetLineNumber()
         self._opener.openContent(row)
 
+    def leave(self):
+        if self._state.isInTargetBuffer():
+            return
+        targetBuffer = self._bufferManager.getCurrentTargetBuffer()
+        targetBuffer.findWindow().move()
+
     def movedCursor(self):
         if self._state.isInMemoBuffer():
             return
         self._opener.auto()
 
-    def writeFile(self, bl):
+    def writeFile(self, bl=False):
         targetBuffer = self._bufferManager.getCurrentTargetBuffer()
         if targetBuffer is None:
             print '保存対象のファイルが見つかりません'
@@ -83,6 +89,7 @@ class Operator(object):
         self._opener.auto()
 
     def toggleSummaryOrContent(self):
+        self.writeFile(False)
         self._state.toggleSummaryOrContent()
         self._opener.auto()
 
@@ -127,6 +134,14 @@ class Operator(object):
         if match:
             row = int(match.group(1))
             self._bufferManager.getCurrentTargetBuffer().findWindow().setCursorPos(row, 0)
+
+
+    def clickSummary(self):
+        lineNum = self._state.lineNumberOfSummary()
+        if lineNum:
+            self._opener.openContent(lineNum, False)
+        else:
+            print 'コンテンツが見つかりません'
 
     def nextMemo(self):
         if self._state.isInMemoBuffer():

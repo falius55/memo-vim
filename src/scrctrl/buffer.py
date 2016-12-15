@@ -33,6 +33,7 @@ class Buffer(object):
     DEFAULT_KEY = 'default_key'
 
     def __init__(self, buf, vim):
+        vim.appendBuffer(self)
         self._buf = buf
         self._vim = vim
         self._tag = {}

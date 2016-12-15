@@ -28,6 +28,17 @@ class StateManager(object):
         targetBuffer = self._bufferManager.getCurrentTargetBuffer()
         return targetBuffer.findWindow().getCursorPos()[0]
 
+    def lineNumberOfSummary(self):
+        import re
+        memoBuffer = self._bufferManager.getTopMemoBuffer()
+        lineNum = memoBuffer.findWindow().getCursorPos()[0]
+        summaryLine = memoBuffer.getText(lineNum - 1)
+        p = re.compile(r'^\[(\d+)\]\s*--\s.*$')
+        match = p.match(summaryLine)
+        if match:
+            targetLine = match.group(1)
+            return int(targetLine)
+
     def hasMemoOfCurrentLine(self):
         targetBuffer = self._bufferManager.getCurrentTargetBuffer()
         line = self.currentTargetLineNumber()

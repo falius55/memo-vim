@@ -60,11 +60,13 @@ call memo_vim#set_autcmd_group(g:memo_effect)
 " プラグインの機能をマップ用に定義する
 " <Plug>(click_summary)でマップできるようになる
 " メモウィンドウ内で実行すると、対象テキストのあるバッファのカーソルが指定位置まで飛ぶ
-nnoremap <silent> <Plug>(click_summary) :<C-u>call memo_vim#summary_click()<CR>
+nnoremap <silent> <Plug>(jump_summary) :<C-u>call memo_vim#summary_jump()<CR>
 " 次のメモのある位置までカーソルが飛ぶ
 nnoremap <silent> <Plug>(next_memo) :<C-u>call memo_vim#next_memo()<CR>
 nnoremap <silent> <Plug>(prev_memo) :<C-u>call memo_vim#prev_memo()<CR>
 nnoremap <silent> <Plug>(toggle_summary_or_content) :<C-u>call memo_vim#toggle_summary()<CR>
-nnorema <silent> <Plug>(open_memo) :<C-u>call memo_vim#open_window()<CR>
+nnoremap <silent> <Plug>(open_memo) :<C-u>call memo_vim#open_window()<CR>
 nnoremap <silent> <Plug>(toggle_memo) :<C-u>call memo_vim#toggle_memo()<CR>
+nnoremap <silent> <Plug>(leave_memo) :<C-u>call memo_vim#leave_memo()<CR>
+nnoremap <silent> <Plug>(click_summary) :<C-u>python clickSummary()<CR>
 

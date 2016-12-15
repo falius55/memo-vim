@@ -90,7 +90,7 @@ class Opener(object):
         """
         memoBuffer = self._bufferManager.getTopMemoBuffer()
         if memoBuffer is None:
-            memoWindow = Window.builder(self._vim).pos(Position.TOPPEST).moveActiveWindow(False).size(5).fileType('memo_vim').bufType('acwrite').tag(MEMO_BUFFER_TAG).build()
+            memoWindow = Window.builder(self._vim).pos(Position.TOPPEST).moveActiveWindow(False).size(5).fileType('memovim').bufType('acwrite').tag(MEMO_BUFFER_TAG).build()
             memoBuffer = memoWindow.getBuffer()
 
         return memoBuffer

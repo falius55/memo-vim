@@ -44,7 +44,6 @@ DELETEBUFFER
 endfunction
 
 function! memo_vim#moved_cursor() abort
-    echo "moved cursor"
 python << MOVEDCURSOR
 movedCursor()
 MOVEDCURSOR
@@ -108,4 +107,21 @@ function! memo_vim#memo_close() abort
 python << MEMOCLOSE
 closeMemo()
 MEMOCLOSE
+endfunction
+
+function! memo_vim#summary_click() abort
+python << SUMMARTCLICK
+jumpSummary()
+SUMMARTCLICK
+endfunction
+
+function! memo_vim#next_memo() abort
+python << NEXTMEMO
+nextMemo()
+NEXTMEMO
+endfunction
+function! memo_vim#prev_memo() abort
+python << PREVMEMO
+prevMemo()
+PREVMEMO
 endfunction

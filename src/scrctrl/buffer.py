@@ -130,6 +130,9 @@ class Buffer(object):
             self._buf.append(strOrList, lineNum)
 
     def getText(self, index):
+        """
+        テキストのインデックスは０から始まる
+        """
         return self._buf[index]
 
     @checkTextChange

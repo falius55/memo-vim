@@ -72,6 +72,18 @@ def tabLeaved():
     operator.tabLeaved()
 
 
+def jumpSummary():
+    operator.jumpSummary()
+
+
+def nextMemo():
+    operator.nextMemo()
+
+
+def prevMemo():
+    operator.prevMemo()
+
+
 def debugMemo():
     try:
         print 'Buffer() list', [e.getName() for e in vimObject._buffers]

@@ -95,7 +95,6 @@ class Memo(object):
         memoBuffer.setTag(key=ROW_TAG, tag=row)
         memoBuffer.setTag(key=BUFFER_TYPE, tag=MEMO_CONTENTS)
         memoBuffer.setModifiable(True)
-        memoBuffer.setFileType('memo_vim_content')
         memoBuffer.setType('acwrite')
         memoBuffer.setOption('swapfile', False)
         memoBuffer.findWindow().setOption('number', True)
@@ -121,7 +120,6 @@ class Memo(object):
         memoBuffer.setTag(ROW_TAG, -1)
         memoBuffer.setTag(key=BUFFER_TYPE, tag=MEMO_SUMMARY)
         memoBuffer.setModifiable(False)
-        memoBuffer.setFileType('memo_vim_summary')
         memoBuffer.setType('nofile')
         memoBuffer.findWindow().setOption('number', False)
         self.setBuffer(memoBuffer)
@@ -140,6 +138,29 @@ class Memo(object):
         minList = [abs(key - row) for key in keys]
         ret = keys[minList.index(min(minList))]
         return ret
+
+    def nextRow(self, row):
+        """
+        指定行より後にあるメモのうち、最初に見つかるメモが何行目にあるかを返します
+        """
+        if self.isEmpty():
+            return None
+        keys = self._memo.keys()
+        keys.sort()
+        for key in keys:
+            if key > row:
+                return key
+        return None
+
+    def prevRow(self, row):
+        if self.isEmpty():
+            return None
+        keys = self._memo.keys()
+        keys.sort(reverse=True)
+        for key in keys:
+            if key < row:
+                return key
+        return None
 
     def saveFile(self):
         jsonString = json.dumps(self._memo)

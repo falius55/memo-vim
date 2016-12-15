@@ -46,9 +46,6 @@ class BufferManager(object):
             return None
         ret = vimObject.findBufferByName(targetName)
         return ret
-        # if ret is not None:
-        #     return ret
-        # raise TypeError('not found target from memo buffer')
 
     @staticmethod
     def getTargetName(memoBuffer):

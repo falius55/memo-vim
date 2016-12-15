@@ -23,6 +23,7 @@ class StateManager(object):
     def currentTargetLineNumber(self):
         """
         何行目にカーソルがあるか
+        カーソル位置は１から始まる
         """
         targetBuffer = self._bufferManager.getCurrentTargetBuffer()
         return targetBuffer.findWindow().getCursorPos()[0]

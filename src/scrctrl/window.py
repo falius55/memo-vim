@@ -39,6 +39,9 @@ class Window(object):
         return self._window.cursor
 
     def setCursorPos(self, row, column):
+        """
+        カーソル移動イベントが発生します
+        """
         self._window.cursor = (row, column)
 
     def height(self, cntLine=None):

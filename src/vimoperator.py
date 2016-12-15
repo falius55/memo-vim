@@ -83,6 +83,7 @@ class Operator(object):
         self._opener.auto()
 
     def toggleSummaryOrContent(self):
+        print 'toggle summary'
         self._state.toggleSummaryOrContent()
         self._opener.auto()
 
@@ -111,6 +112,59 @@ class Operator(object):
     def close(self):
         self._vim.setGlobalVar(MEMO_OPEN, 0)
         self._opener.close()
+
+    def jumpSummary(self):
+        """
+        サマリの行で実行すると、そのターゲットバッファのカーソルが該当行にジャンプします
+        """
+        print 'jump summary'
+        if self._state.isInTargetBuffer():
+            return
+        memoBuffer = self._bufferManager.getTopMemoBuffer()
+        memoWindow = memoBuffer.findWindow()
+        currentSummary = memoBuffer.getText(memoWindow.getCursorPos()[0] - 1)
+        import re
+        p = re.compile(r'^\[([0-9]+)\]\s*--\s.*$')
+        match = p.match(currentSummary)
+        if match:
+            row = int(match.group(1))
+            self._bufferManager.getCurrentTargetBuffer().findWindow().setCursorPos(row, 0)
+
+    def nextMemo(self):
+        if self._state.isInMemoBuffer():
+            return
+        currentTargetBuffer = self._bufferManager.getCurrentTargetBuffer()
+        currentTargetWindow = currentTargetBuffer.findWindow()
+        currentRow = currentTargetWindow.getCursorPos()[0]
+        memo = currentTargetBuffer.getMemo()
+
+        nextRow = memo.nextRow(currentRow)
+        if nextRow is None:
+            nextRow = memo.nextRow(0)
+            if nextRow is None:
+                print 'メモが見つかりませんでした'
+            else:
+                print '後方にメモが見つからなかったので最初に戻ります'
+
+        currentTargetWindow.setCursorPos(nextRow, 0)
+
+    def prevMemo(self):
+        if self._state.isInMemoBuffer():
+            return
+        currentTargetBuffer = self._bufferManager.getCurrentTargetBuffer()
+        currentTargetWindow = currentTargetBuffer.findWindow()
+        currentRow = currentTargetWindow.getCursorPos()[0]
+        memo = currentTargetBuffer.getMemo()
+
+        prevRow = memo.prevRow(currentRow)
+        if prevRow is None:
+            prevRow = memo.prevRow(currentTargetBuffer.getRowLen() + 1)
+            if prevRow is None:
+                print 'メモが見つかりませんでした'
+            else:
+                print '前方にメモが見つからなかったので最後に戻ります'
+
+        currentTargetWindow.setCursorPos(prevRow, 0)
 
 
 if __name__ == '__main__':

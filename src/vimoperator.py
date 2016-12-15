@@ -83,7 +83,6 @@ class Operator(object):
         self._opener.auto()
 
     def toggleSummaryOrContent(self):
-        print 'toggle summary'
         self._state.toggleSummaryOrContent()
         self._opener.auto()
 
@@ -117,7 +116,6 @@ class Operator(object):
         """
         サマリの行で実行すると、そのターゲットバッファのカーソルが該当行にジャンプします
         """
-        print 'jump summary'
         if self._state.isInTargetBuffer():
             return
         memoBuffer = self._bufferManager.getTopMemoBuffer()

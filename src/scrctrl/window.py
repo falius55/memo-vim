@@ -120,10 +120,8 @@ class Window(object):
         指定のバッファをこのウィンドウに表示する
         カーソルは動かない
         """
-        # saveWindow = self._vim.getCurrentWindow()
         self.move()
         vim.command('buffer %d' % self.getNumber())
-        # saveWindow.move()
 
     def __eq__(self, another):
         """
@@ -142,13 +140,15 @@ class Window(object):
         return hash(self._window)
 
     @staticmethod
-    def builder(vim):
-        return WindowBuilder(vim)
+    def builder(vim, bufClass=None):
+        return WindowBuilder(vim, bufClass=bufClass)
 
 
 class WindowBuilder(object):
 
-    def __init__(self, vim):
+    def __init__(self, vim, bufClass=None):
+        if not issubclass(bufClass, Buffer):
+            raise ValueError(str(bufClass) + ' is not instance of Buffer')
         self._vim = vim
         self._pos = Position.LEFTEST
         self._size = 30
@@ -160,6 +160,7 @@ class WindowBuilder(object):
         self._recycleBuffer = None
         self._filetype = None
         self._tag = None
+        self._bufClass = bufClass
 
     def pos(self, pos=Position.LEFTEST):
         if Position.stringFrom(pos) is None:
@@ -265,11 +266,14 @@ class WindowBuilder(object):
         VimオブジェクトにWindowとBufferを追加する
         """
         newBufElem = self._findLatestBufferElem()
-        newBuffer = Buffer(newBufElem, self._vim)
+        if self._bufClass:
+            newBuffer = self._bufClass(newBufElem, self._vim)
+        else:
+            newBuffer = self._vim.newBuffer(newBufElem)
         self._vim.appendBuffer(newBuffer)
 
         newWinElem = self._findWindowElemFromBufferElem(newBufElem)
-        newWindow = Window(newWinElem, self._vim)
+        newWindow = self._vim.newWindow(newWinElem)
         self._vim.appendWindow(newWindow)
         return newWindow
 

@@ -25,9 +25,10 @@ class Memo(object):
         """
         if savePath is None:
             savePath = path.dirname(str(targetBuffer))
+        filename = path.splitext(str(targetBuffer))[0].replace('/', '_') + '-memo'
         self._saveFilePath = path.join(
             savePath,
-            path.splitext(targetBuffer.getName())[0] + '-memo')
+            filename)
         self._memo = self._readFile(self._saveFilePath)
 
         self._targetBuffer = targetBuffer
@@ -43,6 +44,9 @@ class Memo(object):
 
     def getBuffer(self):
         return self._memoBuffer
+
+    def getTarget(self):
+        return self._targetBuffer
 
     def isEmpty(self):
         return len(self._memo) == 0
@@ -61,12 +65,15 @@ class Memo(object):
         """
         memoの内容をメモバッファから自身に取り込みます
         """
-        if memoBuffer.getTag(BUFFER_TYPE) != MEMO_CONTENTS:
+        # if memoBuffer.getTag(BUFFER_TYPE) != MEMO_CONTENTS:
+        if not memoBuffer.isContent():
             raise ValueError('not contents buffer is not kepon out')
         if memoBuffer != self.getBuffer():
             raise ValueError('difference memoBuffer')
-        if memoBuffer.getTag(ROW_TAG) != row:
-            row = memoBuffer.getTag(ROW_TAG)
+        # if memoBuffer.getTag(ROW_TAG) != row:
+        if memoBuffer.row() != row:
+            # row = memoBuffer.getTag(ROW_TAG)
+            row = memoBuffer.row()
         if memoBuffer.isEmpty():
             self.deleteMemo(row)
             return
@@ -101,6 +108,9 @@ class Memo(object):
         memoBuffer.clearUndo()
         self.setBuffer(memoBuffer)
 
+    def content(self, row):
+        return self._memo.get(row, [])
+
     def loadSummary(self, memoBuffer):
         memo = self._memo
         summary = list(memo.keys())
@@ -121,8 +131,17 @@ class Memo(object):
         memoBuffer.setTag(key=BUFFER_TYPE, tag=MEMO_SUMMARY)
         memoBuffer.setModifiable(False)
         memoBuffer.setType('nofile')
+        memoBuffer.setOption('swapfile', False)
         memoBuffer.findWindow().setOption('number', False)
+        # memoBuffer.source(PLUGIN_DIR_PATH + '/autoload/memovim/mappings.vim')
         self.setBuffer(memoBuffer)
+
+    def summary(self):
+        memo = self._memo
+        keys = list(memo.keys())
+        keys.sort()
+        summary = [('[%d]' % row).ljust(6, ' ') + ' -- %s' % memo.get(row, [])[0] for row in keys]
+        return summary
 
     def indexOfKey(self, key):
         summary = list(self._memo.keys())

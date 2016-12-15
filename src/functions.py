@@ -1,6 +1,6 @@
 #!/usr/bin/python3.4
 # -*- coding: utf-8 -*-
-from scrctrl.extendvim import Vim
+from scrctrl.memovim import MemoVim
 from vimoperator import Operator
 
 import vim
@@ -91,9 +91,10 @@ def debugMemo():
         print 'vim.error'
     print 'buffer elems', [e.name for e in vim.buffers]
     print 'buffer tags', [e.getTag() for e in vimObject._buffers]
+    print 'buffer class', [e.__class__ for e in vimObject._buffers]
 
 
 if __name__ == '__main__':
-    vimObject = globals().get('vimObject', Vim())
+    vimObject = globals().get('vimObject', MemoVim())
     isSummary = False
     operator = globals().get('operator', Operator(vimObject))

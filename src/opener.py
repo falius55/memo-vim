@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 from constant import MEMO_BUFFER_TAG
 from scrctrl.window import Window, Position
+from scrctrl.memobuffer import MemoBuffer
 
 
 class Opener(object):
@@ -41,7 +42,8 @@ class Opener(object):
         if self._state.isContentMemoOpened(row):
             pass
         else:
-            memo.load(row, memoBuffer)
+            # memo.load(row, memoBuffer)
+            memoBuffer.loadContent(memo, row)
 
         if moveActive:
             memoBuffer.findWindow().move()
@@ -51,7 +53,8 @@ class Opener(object):
         memoBuffer = self._openWindow()
         memo = targetBuffer.getMemo()
 
-        memo.loadSummary(memoBuffer)
+        # memo.loadSummary(memoBuffer)
+        memoBuffer.loadSummary(memo)
 
         if moveActive:
             memoBuffer.findWindow().move()
@@ -90,7 +93,7 @@ class Opener(object):
         """
         memoBuffer = self._bufferManager.getTopMemoBuffer()
         if memoBuffer is None:
-            memoWindow = Window.builder(self._vim).pos(Position.TOPPEST).moveActiveWindow(False).size(5).fileType('memovim').bufType('acwrite').tag(MEMO_BUFFER_TAG).build()
+            memoWindow = Window.builder(self._vim, bufClass=MemoBuffer).pos(Position.TOPPEST).moveActiveWindow(False).size(5).fileType('memovim').bufType('acwrite').build()
             memoBuffer = memoWindow.getBuffer()
 
         return memoBuffer

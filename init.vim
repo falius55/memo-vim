@@ -7,9 +7,9 @@ let g:memo_vim_directorypath = '/home/black-ubuntu/.vim/plugin/memos'  " メモ�
 let g:memo_effect = 1  " カーソル移動イベントの有効無効 0:無効 1:有効
 let g:memo_open = 2  " メモウィンドウの設定 0:全く開かない 1: 必要に応じて開く 2: 常に開いた状態にしておく
 
-let s:dirpath = fnamemodify(resolve(expand('<sfile>:p')), ':h')  " 関数内では書けない
+let g:dirpath = fnamemodify(resolve(expand('<sfile>:p')), ':h')  " 関数内では書けない
 function! s:init_py() abort
-    let l:srcpath = s:dirpath."/src"
+    let l:srcpath = g:dirpath."/src"
     let l:init_py_file = l:srcpath."/init.py"
     let l:function_py_file = l:srcpath."/functions.py"
     execute 'pyfile '.l:init_py_file

@@ -21,3 +21,5 @@ except vim.error:
 
 # ウィンドウの設定変数名
 MEMO_OPEN = 'memo_open'
+
+PLUGIN_DIR_PATH = vim.vars.get('dirpath')

@@ -36,7 +36,7 @@ class Buffer(object):
         self._buf = buf
         self._vim = vim
         self._tag = {}
-        self._memo = Memo(self, MEMO_DIRECTORY_PATH)
+        # self._memo = Memo(self, MEMO_DIRECTORY_PATH)
 
     def __str__(self):
         """
@@ -225,11 +225,11 @@ class Buffer(object):
             return self._buf is another
         return False
 
-    def __hash(self):
+    def __hash__(self):
         return hash(self._buf)
 
-    def getMemo(self):
-        return self._memo
+    # def getMemo(self):
+    #     return self._memo
 
     @saveWindow
     def finish(self):
@@ -252,6 +252,11 @@ class Buffer(object):
         vim.command('let &undolevels = old_undolevels')
         vim.command('unlet old_undolevels')
         self.setModified(False)
+
+    @saveWindow
+    def source(self, path):
+        self.findWindow().move()
+        vim.command('source ' + path)
 
 
 class FileContents(object):

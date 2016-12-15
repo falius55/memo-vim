@@ -42,23 +42,28 @@ class StateManager(object):
             return False
         memoBuffer = self._bufferManager.getTopMemoBuffer()
         if row is None:
-            return memoBuffer.getTag(BUFFER_TYPE) == MEMO_CONTENTS
+            # return memoBuffer.getTag(BUFFER_TYPE) == MEMO_CONTENTS
+            return memoBuffer.isContents()
         else:
-            return memoBuffer.getTag(ROW_TAG) == row
+            # return memoBuffer.getTag(ROW_TAG) == row
+            return memoBuffer.row() == row
 
     def isSummaryMemoOpened(self):
         if not self.isMemoOpened():
             return False
         memoBuffer = self._bufferManager.getTopMemoBuffer()
-        return memoBuffer.getTag(BUFFER_TYPE) == MEMO_SUMMARY
+        # return memoBuffer.getTag(BUFFER_TYPE) == MEMO_SUMMARY
+        return memoBuffer.isSummary()
 
     def isInTargetBuffer(self):
         currentBuffer = self._bufferManager.getCurrentBuffer()
-        return currentBuffer.getTag() != MEMO_BUFFER_TAG
+        return currentBuffer.isTextBuffer()
+        # return currentBuffer.getTag() != MEMO_BUFFER_TAG
 
     def isInMemoBuffer(self):
         currentBuffer = self._bufferManager.getCurrentBuffer()
-        return currentBuffer.getTag() == MEMO_BUFFER_TAG
+        return currentBuffer.isMemoBuffer()
+        # return currentBuffer.getTag() == MEMO_BUFFER_TAG
 
     def isSummary(self):
         return self._isSummary

@@ -51,5 +51,15 @@ class Tab(object):
     def getCurrentWindow(self):
         return self._vim.find(self._tab.window)
 
-    def __hash(self):
+    def __eq__(self, another):
+        """
+        vim標準との比較でも、同じタブを指していればTrueを返す
+        """
+        if isinstance(another, Tab):
+            return self is another
+        elif isinstance(another, vim.TabPage):
+            return self._tab is another
+        return False
+
+    def __hash__(self):
         return hash(self._tab)

@@ -22,11 +22,15 @@ def checkActiveElem(func):
             windows = wvim._windows
             for winElem in vim.windows:
                 if winElem not in windows:
-                    wvim.appendWindow(Window(winElem, wvim))
+                    wvim.appendWindow(wvim.newWindow(winElem))
             buffers = wvim._buffers
             for bufElem in vim.buffers:
                 if bufElem not in buffers:
-                    wvim.appendBuffer(Buffer(bufElem, wvim))
+                    wvim.appendBuffer(wvim.newBuffer(bufElem))
+            tabs = wvim._tabs
+            for tabElem in vim.tabpages:
+                if tabElem not in tabs:
+                    wvim.appendTab(wvim.newTab(tabElem))
             result = func(self, *args, **kwargs)
         return result
     return wrapper
@@ -52,27 +56,39 @@ def checkDeadElem(func):
 class Vim(object):
 
     def __init__(self):
-        self._initBuffer()
-        self._initWindow()
-        self._initTab()
+        self._buffers = self._initBuffer()
+        self._windows = self._initWindow()
+        self._tabs = self._initTab()
 
     def _initBuffer(self):
         buffers = []
         for buf in vim.buffers:
-            buffers.append(Buffer(buf, self))
-        self._buffers = buffers
+            buffers.append(self.newBuffer(buf))
+        # self._buffers = buffers
+        return buffers
+
+    def newBuffer(self, elem):
+        return Buffer(elem, self)
 
     def _initWindow(self):
         windows = []
         for win in vim.windows:
-            windows.append(Window(win, self))
-        self._windows = windows
+            windows.append(self.newWindow(win))
+        # self._windows = windows
+        return windows
+
+    def newWindow(self, elem):
+        return Window(elem, self)
 
     def _initTab(self):
         tabs = []
         for tab in vim.tabpages:
-            tabs.append(Tab(tab, self))
-        self._tabs = tabs
+            tabs.append(self.newTab(tab))
+        # self._tabs = tabs
+        return tabs
+
+    def newTab(self, elem):
+        return Tab(elem, self)
 
     def getGlobalVar(self, varName, defaultIfNotFound=None):
         if defaultIfNotFound is None:
@@ -144,7 +160,10 @@ class Vim(object):
     def appendWindow(self, window):
         self._windows.append(window)
 
-    def __hash(self):
+    def appendTab(self, tab):
+        self._tabs.append(tab)
+
+    def __hash__(self):
         result = 17
         for buf in self._buffers:
             result = 31 * result + hash(buf.elem())

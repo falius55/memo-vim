@@ -20,7 +20,7 @@ class BufferManager(object):
 
     def getCurrentTargetBuffer(self):
         currentBuffer = self.getCurrentBuffer()
-        if currentBuffer.getTag() == MEMO_BUFFER_TAG:
+        if currentBuffer.isMemoBuffer():
             return self._findTargetBufferFrom(currentBuffer)
         return currentBuffer
 
@@ -57,4 +57,3 @@ class BufferManager(object):
         match = p.match(memoBuffer.getName())
         if match:
             return match.group(match.lastindex)
-        # raise TypeError('not found target from memo buffer')

@@ -37,7 +37,6 @@ class Buffer(object):
         self._buf = buf
         self._vim = vim
         self._tag = {}
-        # self._memo = Memo(self, MEMO_DIRECTORY_PATH)
 
     def __str__(self):
         """
@@ -229,9 +228,6 @@ class Buffer(object):
     def __hash__(self):
         return hash(self._buf)
 
-    # def getMemo(self):
-    #     return self._memo
-
     @saveWindow
     def finish(self):
         window = self.findWindow()
@@ -246,6 +242,9 @@ class Buffer(object):
 
     @saveWindow
     def clearUndo(self):
+        """
+        undoスタックをクリアする
+        """
         self.findWindow().move()
         vim.command('let old_undolevels = &undolevels')
         vim.command('set undolevels=-1')

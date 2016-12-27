@@ -37,7 +37,7 @@ class Memo(object):
     def setBuffer(self, memoBuffer):
         """
         自身の内容を表示するメモバッファを保持させる
-        メモバッファが作成された時に設定し、
+        バッファにロードした時に設定し、
         メモバッファを破棄するときにNoneを設定する
         """
         self._memoBuffer = memoBuffer
@@ -65,14 +65,11 @@ class Memo(object):
         """
         memoの内容をメモバッファから自身に取り込みます
         """
-        # if memoBuffer.getTag(BUFFER_TYPE) != MEMO_CONTENTS:
         if not memoBuffer.isContents():
             raise ValueError('not contents buffer is not kepon out')
         if memoBuffer != self.getBuffer():
             raise ValueError('difference memoBuffer')
-        # if memoBuffer.getTag(ROW_TAG) != row:
         if memoBuffer.row() != row:
-            # row = memoBuffer.getTag(ROW_TAG)
             row = memoBuffer.row()
         if memoBuffer.isEmpty():
             self.deleteMemo(row)
@@ -83,58 +80,8 @@ class Memo(object):
             memo.append(line)
         self._memo[row] = memo
 
-    def load(self, row, memoBuffer):
-        """
-        指定行のメモ内容をメモバッファに書き込みます
-        登録されているメモ内容がなければ空文字を書き込みます
-        """
-        if not isinstance(row, int):
-            raise ValueError('row is not int type')
-        memoBuffer.clearText()
-        memo = self._memo.get(row, [])
-        memoBuffer.appendText(memo)
-        if memoBuffer.getText(0) == '':
-            memoBuffer.deleteText(0)  # 最初の空行は削除する
-
-        memoBuffer.setModified(False)
-        memoName = makeMemoName(self._targetBuffer, row)
-        memoBuffer.setName(memoName)
-        memoBuffer.setTag(key=ROW_TAG, tag=row)
-        memoBuffer.setTag(key=BUFFER_TYPE, tag=MEMO_CONTENTS)
-        memoBuffer.setModifiable(True)
-        memoBuffer.setType('acwrite')
-        memoBuffer.setOption('swapfile', False)
-        memoBuffer.findWindow().setOption('number', True)
-        memoBuffer.clearUndo()
-        self.setBuffer(memoBuffer)
-
     def content(self, row):
         return self._memo.get(row, [])
-
-    def loadSummary(self, memoBuffer):
-        memo = self._memo
-        summary = list(memo.keys())
-        summary.sort()
-        summaryList = [('[%d]' % row).ljust(6, ' ') + ' -- %s' % memo.get(row, [])[0] for row in summary]
-        memoBuffer.clearText()
-        memoBuffer.appendText(summaryList)
-        if memoBuffer.getText(0) == '':
-            memoBuffer.deleteText(0)
-
-        memoBuffer.setModified(False)
-        summaryName = makeSummaryName(self._targetBuffer)
-        try:
-            memoBuffer.setName(summaryName)
-        except vim.error:
-            print 'すでにある名前', summaryName
-        memoBuffer.setTag(ROW_TAG, -1)
-        memoBuffer.setTag(key=BUFFER_TYPE, tag=MEMO_SUMMARY)
-        memoBuffer.setModifiable(False)
-        memoBuffer.setType('nofile')
-        memoBuffer.setOption('swapfile', False)
-        memoBuffer.findWindow().setOption('number', False)
-        # memoBuffer.source(PLUGIN_DIR_PATH + '/autoload/memovim/mappings.vim')
-        self.setBuffer(memoBuffer)
 
     def summary(self):
         memo = self._memo
@@ -151,6 +98,9 @@ class Memo(object):
         return -1
 
     def closestRow(self, row):
+        """
+        メモが存在する行のうち、指定行に最も近い行の数値を返す
+        """
         if self.isEmpty():
             return None
         keys = self._memo.keys()
@@ -187,6 +137,9 @@ class Memo(object):
             f.write(jsonString)
 
     def notifyDeleteRow(self, row):
+        """
+        本文のテキストに行が削除された時の処理
+        """
         memo = self._memo
         if row in memo:
             del memo[row]
@@ -197,6 +150,9 @@ class Memo(object):
                 memo[key - 1] = content
 
     def notifyAddRow(self, row):
+        """
+        行が追加された時の処理
+        """
         if not isinstance(row, int):
             raise ValueError()
         memo = self._memo
@@ -213,6 +169,7 @@ class Memo(object):
         if not path.exists(saveFilePath):
             return {}
 
+        # TODO: jsonファイルが書き換えられるなどして読み込めなくなっていた場合の処理を行う。余計な改行が入っているなどの場合はつなげるだけでいいのでエラー扱いにはしない
         with open(saveFilePath, 'r') as f:
             jsonString = f.read()
 
@@ -229,7 +186,6 @@ class Memo(object):
     def hasMemo(self, row):
         return row in self._memo
 
-    # TODO: メモを削除した時にメモバッファが表示されている状態ならば、表示されているテキストをクリアする
     def deleteMemo(self, row):
         if self.hasMemo(row):
             del self._memo[row]

@@ -42,7 +42,6 @@ class Opener(object):
         if self._state.isContentMemoOpened(row):
             pass
         else:
-            # memo.load(row, memoBuffer)
             memoBuffer.loadContent(memo, row)
 
         if moveActive:
@@ -53,7 +52,6 @@ class Opener(object):
         memoBuffer = self._openWindow()
         memo = targetBuffer.getMemo()
 
-        # memo.loadSummary(memoBuffer)
         memoBuffer.loadSummary(memo)
 
         if moveActive:
@@ -91,6 +89,7 @@ class Opener(object):
         メモウィンドウが開いた状態にして、そのバッファを返す
         すでにメモウィンドウが開いていれば単にバッファを返すのみとなる
         """
+        # TODO: 働きをBufferManagerに移動
         memoBuffer = self._bufferManager.getTopMemoBuffer()
         if memoBuffer is None:
             memoWindow = Window.builder(self._vim, bufClass=MemoBuffer).pos(Position.TOPPEST).moveActiveWindow(False).size(5).fileType('memovim').bufType('acwrite').build()

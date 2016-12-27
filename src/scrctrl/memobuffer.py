@@ -58,7 +58,6 @@ class MemoBuffer(Buffer):
     def row(self):
         return self._row
 
-    @saveWindow
     def loadContent(self, memo, row):
         if not isinstance(row, int):
             raise ValueError('row is not int type')

@@ -5,6 +5,7 @@ import vim
 from buffermanager import BufferManager
 from state import StateManager
 from opener import Opener
+from util.utils import boundMode
 
 from textdiff import DiffParser
 
@@ -34,6 +35,7 @@ class Operator(object):
         targetBuffer = self._bufferManager.getCurrentTargetBuffer()
         targetBuffer.findWindow().move()
 
+    @boundMode('n')  # ビジュアルモードでは、バッファのマッピング定義のためウィンドウ移動する際にビジュアルモードが解除されてしまうのでノーマルモードに限定する
     def movedCursor(self):
         if self._state.isInMemoBuffer():
             return
@@ -106,6 +108,7 @@ class Operator(object):
         """
         メモウィンドウの有効無効を切り替える。これは'常にウィンドウを開く'と'ウィンドウを全く開かない'のトグルなので、必要に応じて開く設定にはならない
         """
+        # TODO: メモウィンドウ内で実行するとエラー
         if self._vim.getGlobalVar(MEMO_OPEN, 0) == 0:
             self._vim.setGlobalVar(MEMO_OPEN, 2)
         else:
@@ -156,6 +159,7 @@ class Operator(object):
             nextRow = memo.nextRow(0)
             if nextRow is None:
                 print 'メモが見つかりませんでした'
+                return
             else:
                 print '後方にメモが見つからなかったので最初に戻ります'
 

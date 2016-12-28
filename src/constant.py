@@ -20,6 +20,6 @@ except vim.error:
     MEMO_DIRECTORY_PATH = None  # 変数が定義されていない
 
 # ウィンドウの設定変数名
-MEMO_OPEN = 'memo_open'
+VAR_MEMO_OPEN = 'memo_open'
 
 PLUGIN_DIR_PATH = vim.vars.get('dirpath')

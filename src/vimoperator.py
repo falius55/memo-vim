@@ -10,7 +10,7 @@ from util.utils import boundMode
 from textdiff import DiffParser
 
 from constant import MEMORY_PRE_TEXT
-from constant import MEMO_OPEN
+# from constant import MEMO_OPEN
 
 
 class Operator(object):
@@ -108,36 +108,18 @@ class Operator(object):
         """
         メモウィンドウの有効無効を切り替える。これは'常にウィンドウを開く'と'ウィンドウを全く開かない'のトグルなので、必要に応じて開く設定にはならない
         """
-        # TODO: メモウィンドウ内で実行するとエラー
-        if self._vim.getGlobalVar(MEMO_OPEN, 0) == 0:
-            self._vim.setGlobalVar(MEMO_OPEN, 2)
+        if self._state.isInvalid():
+            self._state.toAlltime()
         else:
-            self._vim.setGlobalVar(MEMO_OPEN, 0)
+            self._state.toInvalid()
         self._opener.auto()
 
     def open(self):
         self._opener.auto()
 
     def close(self):
-        self._vim.setGlobalVar(MEMO_OPEN, 0)
+        self._state.toInvalid()
         self._opener.close()
-
-    def jumpSummary(self):
-        """
-        サマリの行で実行すると、そのターゲットバッファのカーソルが該当行にジャンプします
-        """
-        if self._state.isInTargetBuffer():
-            return
-        memoBuffer = self._bufferManager.getTopMemoBuffer()
-        memoWindow = memoBuffer.findWindow()
-        currentSummary = memoBuffer.getText(memoWindow.getCursorPos()[0] - 1)
-        import re
-        p = re.compile(r'^\[([0-9]+)\]\s*--\s.*$')
-        match = p.match(currentSummary)
-        if match:
-            row = int(match.group(1))
-            self._bufferManager.getCurrentTargetBuffer().findWindow().setCursorPos(row, 0)
-
 
     def clickSummary(self):
         lineNum = self._state.lineNumberOfSummary()
@@ -178,6 +160,7 @@ class Operator(object):
             prevRow = memo.prevRow(currentTargetBuffer.getRowLen() + 1)
             if prevRow is None:
                 print 'メモが見つかりませんでした'
+                return
             else:
                 print '前方にメモが見つからなかったので最後に戻ります'
 

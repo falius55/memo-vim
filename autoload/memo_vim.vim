@@ -1,29 +1,29 @@
 " init.vimで利用する関数を定義する
 
-function! memo_vim#toggle_autcmd_group() abort
-    if g:memo_effect == 0
-        let g:memo_effect = 1
-        call memo_vim#set_autcmd_group(g:memo_effect)
-    elseif g:memo_effect == 1
-        let g:memo_effect = 0
-        call memo_vim#set_autcmd_group(g:memo_effect)
-    endif
-endfunction
+" function! memo_vim#toggle_autcmd_group() abort
+"     if g:memo_effect == 0
+"         let g:memo_effect = 1
+"         call memo_vim#set_autcmd_group(g:memo_effect)
+"     elseif g:memo_effect == 1
+"         let g:memo_effect = 0
+"         call memo_vim#set_autcmd_group(g:memo_effect)
+"     endif
+" endfunction
 
-function! memo_vim#set_autcmd_group(bl) abort
-    " CursorMoved, WinEnterイベントの有効無効を切り替える
-    " 引数が０なら無効、１以上なら有効
-    if a:bl > 0
-        augroup MemoVim
-            autocmd!
-            autocmd! CursorMoved,WinEnter * call memo_vim#moved_cursor()  " カーソルが移動した時、別のウィンドウに入った時
-        augroup END
-    elseif a:bl == 0
-        augroup MemoVim
-            autocmd!
-        augroup END
-    endif
-endfunction
+" function! memo_vim#set_autcmd_group(bl) abort
+"     " CursorMoved, WinEnterイベントの有効無効を切り替える
+"     " 引数が０なら無効、１以上なら有効
+"     if a:bl > 0
+"         augroup MemoVim
+"             autocmd!
+"             autocmd! CursorMoved,WinEnter * call memo_vim#moved_cursor()  " カーソルが移動した時、別のウィンドウに入った時
+"         augroup END
+"     elseif a:bl == 0
+"         augroup MemoVim
+"             autocmd!
+"         augroup END
+"     endif
+" endfunction
 
 function! memo_vim#open_window() abort
 python << OPENMEMO
@@ -115,11 +115,11 @@ closeMemo()
 MEMOCLOSE
 endfunction
 
-function! memo_vim#summary_jump() abort
-python << SUMMARTCLICK
-jumpSummary()
-SUMMARTCLICK
-endfunction
+" function! memo_vim#summary_jump() abort
+" python << SUMMARTCLICK
+" jumpSummary()
+" SUMMARTCLICK
+" endfunction
 
 function! memo_vim#next_memo() abort
 python << NEXTMEMO

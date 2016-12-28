@@ -30,6 +30,11 @@ def checkTextChange(func):
 
 
 class Buffer(object):
+    """
+    バッファを表すクラスです。
+    同じバッファが複数ウィンドウで表示されている場合でも、
+    そのいずれも同じオブジェクトが担当しますので注意してください
+    """
     DEFAULT_KEY = 'default_key'
 
     def __init__(self, buf, vim):
@@ -87,6 +92,13 @@ class Buffer(object):
         return self._buf.number
 
     def findWindow(self):
+        """
+        同じバッファが複数ウィンドウで表示されていて、かつそのいずれにも現在カーソルが
+        ない場合には最初に見つかったウィンドウのオブジェクトを返します。
+        もしそのいずれかに現在カーソルがある場合は、カーソルのあるウィンドウのオブジェクトを返します。
+        """
+        if self.isCurrent():
+            return self._vim.find(vim.current.window)
         for win in vim.windows:
             if win.buffer == self._buf:
                 return self._vim.find(win)
@@ -121,6 +133,9 @@ class Buffer(object):
 
     def isOpen(self):
         return self.findWindow() is not None
+
+    def isCurrent(self):
+        return vim.current.buffer is self._buf
 
     @checkTextChange
     def appendText(self, strOrList, lineNum=None):

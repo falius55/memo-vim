@@ -6,7 +6,7 @@ from constant import BUFFER_TYPE
 from constant import MEMO_CONTENTS
 from constant import MEMO_SUMMARY
 from constant import ROW_TAG
-from constant import MEMO_OPEN
+from constant import VAR_MEMO_OPEN
 
 import vim
 
@@ -53,28 +53,23 @@ class StateManager(object):
             return False
         memoBuffer = self._bufferManager.getTopMemoBuffer()
         if row is None:
-            # return memoBuffer.getTag(BUFFER_TYPE) == MEMO_CONTENTS
             return memoBuffer.isContents()
         else:
-            # return memoBuffer.getTag(ROW_TAG) == row
             return memoBuffer.row() == row
 
     def isSummaryMemoOpened(self):
         if not self.isMemoOpened():
             return False
         memoBuffer = self._bufferManager.getTopMemoBuffer()
-        # return memoBuffer.getTag(BUFFER_TYPE) == MEMO_SUMMARY
         return memoBuffer.isSummary()
 
     def isInTargetBuffer(self):
         currentBuffer = self._bufferManager.getCurrentBuffer()
         return currentBuffer.isTextBuffer()
-        # return currentBuffer.getTag() != MEMO_BUFFER_TAG
 
     def isInMemoBuffer(self):
         currentBuffer = self._bufferManager.getCurrentBuffer()
         return currentBuffer.isMemoBuffer()
-        # return currentBuffer.getTag() == MEMO_BUFFER_TAG
 
     def isSummary(self):
         return self._isSummary
@@ -86,23 +81,29 @@ class StateManager(object):
             self._isSummary = True
 
     def isAlltimeMemoWindow(self):
-        memoOpen = vim.vars.get(MEMO_OPEN, 0)
+        memoOpen = vim.vars.get(VAR_MEMO_OPEN, 0)
 
         if memoOpen == 2:
             return True
         return False
 
     def isRequiredMemoWindow(self):
-        memoOpen = vim.vars.get(MEMO_OPEN, 0)
+        memoOpen = vim.vars.get(VAR_MEMO_OPEN, 0)
         if memoOpen == 1:
             return True
         return False
 
     def isInvalid(self):
-        memoOpen = vim.vars.get(MEMO_OPEN, 0)
+        memoOpen = vim.vars.get(VAR_MEMO_OPEN, 0)
         if memoOpen == 0:
             return True
         return False
 
+    def toAlltime(self):
+        vim.vars[VAR_MEMO_OPEN] = 2
+
+    def toInvalid(self):
+        vim.vars[VAR_MEMO_OPEN] = 0
+
     def openConf(self):
-        return vim.vars.get(MEMO_OPEN)
+        return vim.vars.get(VAR_MEMO_OPEN)

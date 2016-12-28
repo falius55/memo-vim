@@ -28,6 +28,7 @@ class Opener(object):
             self._autoOnRequired()
         elif self._state.isInvalid() and self._state.isMemoOpened():
             self.close()
+            return
 
         if isInMemo:
             self._bufferManager.getTopMemoBuffer().findWindow().move()

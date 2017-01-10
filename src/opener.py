@@ -2,7 +2,10 @@
 # -*- coding: utf-8 -*-
 from constant import MEMO_BUFFER_TAG
 from scrctrl.window import Window, Position
+from scrctrl.memowindow import MemoWindow
 from scrctrl.memobuffer import MemoBuffer
+
+import vim
 
 
 class Opener(object):
@@ -37,6 +40,8 @@ class Opener(object):
         if not isinstance(row, int):
             raise ValueError('row is needed int type')
         targetBuffer = self._bufferManager.getCurrentTargetBuffer()
+        if targetBuffer is None:
+            return
         memo = targetBuffer.getMemo()
         memoBuffer = self._openWindow()
 
@@ -93,7 +98,8 @@ class Opener(object):
         # TODO: 働きをBufferManagerに移動
         memoBuffer = self._bufferManager.getTopMemoBuffer()
         if memoBuffer is None:
-            memoWindow = Window.builder(self._vim, bufClass=MemoBuffer).pos(Position.TOPPEST).moveActiveWindow(False).size(5).fileType('memovim').bufType('acwrite').build()
+            vim.command('normal =')
+            memoWindow = Window.builder(self._vim, bufClass=MemoBuffer, winClass=MemoWindow).pos(Position.TOPPEST).moveActiveWindow(False).size(5).fileType('memovim').bufType('acwrite').build()
             memoBuffer = memoWindow.getBuffer()
 
         return memoBuffer

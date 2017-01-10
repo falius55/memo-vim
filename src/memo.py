@@ -139,6 +139,7 @@ class Memo(object):
     def notifyDeleteRow(self, row):
         """
         本文のテキストに行が削除された時の処理
+        削除行以降のメモの行を一行減らす
         """
         memo = self._memo
         if row in memo:
@@ -152,6 +153,7 @@ class Memo(object):
     def notifyAddRow(self, row):
         """
         行が追加された時の処理
+        追加行以降の行を一行増やす
         """
         if not isinstance(row, int):
             raise ValueError()

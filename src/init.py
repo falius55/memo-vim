@@ -4,5 +4,5 @@
 import sys
 
 
-def init_path(path):
+def memovim_init_path(path):
     sys.path.append(path)

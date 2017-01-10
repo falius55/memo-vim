@@ -24,8 +24,8 @@ function! memovim#mappings#unset_summary_mappings() abort
 endfunction
 
 function! memovim#mappings#set_content_mappings() abort
-    nmap <buffer> <ESC> <Plug>(toggle_summary_or_content)
-    nmap <buffer> <C-h> <Plug>(toggle_summary_or_content)
+    nmap <buffer> <ESC> <Plug>(open_summary)
+    nmap <buffer> <C-h> <Plug>(open_summary)
 endfunction
 
 function! memovim#mappings#unset_content_mappings() abort

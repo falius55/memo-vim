@@ -29,11 +29,15 @@ class Operator(object):
         row = self._state.currentTargetLineNumber()
         self._opener.openContent(row)
 
+    def openSummary(self):
+        self._opener.openSummary(False)
+
     def leave(self):
         if self._state.isInTargetBuffer():
             return
         targetBuffer = self._bufferManager.getCurrentTargetBuffer()
         targetBuffer.findWindow().move()
+        self.writeFile()
 
     @boundMode('n')  # ビジュアルモードでは、バッファのマッピング定義のためウィンドウ移動する際にビジュアルモードが解除されてしまうのでノーマルモードに限定する
     def movedCursor(self):
@@ -42,14 +46,17 @@ class Operator(object):
         self._opener.auto()
 
     def writeFile(self, bl=False):
+        """
+        bl : 本文テキストの書き込みを行うかどうか
+        """
         targetBuffer = self._bufferManager.getCurrentTargetBuffer()
         if targetBuffer is None:
             print '保存対象のファイルが見つかりません'
             return
-        if bl:
-            targetBuffer.findWindow().move()
+        if bl and self._state.isInTargetBuffer():
+            # targetBuffer.findWindow().move()
             vim.command('w')
-            targetBuffer.setModified(False)
+            # targetBuffer.setModified(False)
 
         memo = targetBuffer.getMemo()
 
@@ -95,11 +102,11 @@ class Operator(object):
         self._state.toggleSummaryOrContent()
         self._opener.auto()
 
-    def initBuffer(self):
-        if self._state.isInMemoBuffer():
-            return
-        targetBuffer = self._bufferManager.getCurrentBuffer()
-        targetBuffer.setTag(MEMORY_PRE_TEXT, targetBuffer.getContentsList())
+    # def initBuffer(self):
+    #     if self._state.isInMemoBuffer():
+    #         return
+    #     targetBuffer = self._bufferManager.getCurrentBuffer()
+    #     targetBuffer.setTag(MEMORY_PRE_TEXT, targetBuffer.getContentsList())
 
     def tabLeaved(self):
         self._opener.close()

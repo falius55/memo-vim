@@ -61,11 +61,11 @@ writeMemoFile(int(vim.eval('a:bl')) != 0)
 SAVEFILE
 endfunction
 
-function! memo_vim#init_buffer() abort
-python << INITBUFFER
-initBuffer()
-INITBUFFER
-endfunction
+" function! memo_vim#init_buffer() abort
+" python << INITBUFFER
+" initBuffer()
+" INITBUFFER
+" endfunction
 
 function! memo_vim#delete_memo(...) abort
 python << DELETEMEMO

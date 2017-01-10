@@ -141,13 +141,13 @@ class Window(object):
         return hash(self._window)
 
     @staticmethod
-    def builder(vim, bufClass=None):
-        return WindowBuilder(vim, bufClass=bufClass)
+    def builder(vim, bufClass=None, winClass=None):
+        return WindowBuilder(vim, bufClass=bufClass, winClass=winClass)
 
 
 class WindowBuilder(object):
 
-    def __init__(self, vim, bufClass=None):
+    def __init__(self, vim, bufClass=None, winClass=None):
         if not issubclass(bufClass, Buffer):
             raise ValueError(str(bufClass) + ' is not subclass of Buffer')
         self._vim = vim
@@ -162,6 +162,7 @@ class WindowBuilder(object):
         self._filetype = None
         self._tag = None
         self._bufClass = bufClass
+        self._winClass = winClass
 
     def pos(self, pos=Position.LEFTEST):
         if Position.stringFrom(pos) is None:
@@ -273,7 +274,10 @@ class WindowBuilder(object):
             self._vim.newBuffer(newBufElem)
 
         newWinElem = self._findWindowElemFromBufferElem(newBufElem)
-        newWindow = self._vim.newWindow(newWinElem)
+        if self._winClass:
+            newWindow = self._winClass(newWinElem, self._vim)
+        else:
+            newWindow = self._vim.newWindow(newWinElem)
         return newWindow
 
     def _findLatestBufferElem(self):

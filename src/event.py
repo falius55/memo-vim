@@ -4,10 +4,10 @@ from constant import MEMO_BUFFER_TAG
 from constant import ROW_TAG
 from constant import BUFFER_TYPE
 from constant import MEMO_SUMMARY
-
 from constant import MEMO_CONTENTS
-from scrctrl.window import Window, Position
 from constant import MEMORY_PRE_TEXT
+
+from scrctrl.window import Window, Position
 from textdiff import DiffParser
 import vim
 

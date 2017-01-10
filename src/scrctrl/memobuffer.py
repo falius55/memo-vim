@@ -5,6 +5,7 @@ from constant import MEMO_BUFFER_TAG
 from constant import MEMO_DIRECTORY_PATH
 from constant import MEMO_SUMMARY
 from constant import MEMO_CONTENTS
+from constant import MEMORY_PRE_TEXT
 from constant import ROW_TAG
 from util.utils import makeMemoName
 from util.utils import makeSummaryName
@@ -18,6 +19,7 @@ class TextBuffer(Buffer):
     def __init__(self, buf, vim):
         Buffer.__init__(self, buf, vim)
         self._memo = Memo(self, MEMO_DIRECTORY_PATH)
+        self.setTag(MEMORY_PRE_TEXT, self.getContentsList())
 
     def getMemo(self):
         return self._memo

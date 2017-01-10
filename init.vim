@@ -7,7 +7,7 @@ let g:memo_vim_directorypath = '/home/black-ubuntu/.vim/plugin/memos'  " メモ�
 " let g:memo_effect = 1  " カーソル移動イベントの有効無効 0:無効 1:有効
 let g:memo_open = 2  " メモウィンドウの設定 0:全く開かない 1: 必要に応じて開く 2: 常に開いた状態にしておく
 
-let g:dirpath = fnamemodify(resolve(expand('<sfile>:p')), ':h')  " 関数内では書けない
+let g:dirpath = fnamemodify(resolve(expand('<sfile>:p')), ':h')  " 現在ディレクトリ。関数内では書けない
 function! s:init_py() abort
     let l:srcpath = g:dirpath."/src"
     let l:init_py_file = l:srcpath."/init.py"
@@ -15,7 +15,7 @@ function! s:init_py() abort
     execute 'pyfile '.l:init_py_file
 python << INITPYTHON
 import vim
-init_path(vim.eval('l:srcpath'))
+memovim_init_path(vim.eval('l:srcpath'))
 INITPYTHON
     execute 'pyfile '.l:function_py_file
 endfunction
@@ -40,21 +40,25 @@ command! DebugMemo call memo_vim#debug_memo()
 
 command! CloseMemo call memo_vim#memo_close()
 
-autocmd! TextChanged * call memo_vim#update_memo_position()
+augroup memovim_autocmd
+    autocmd!
+    autocmd TextChanged * call memo_vim#update_memo_position()
 
-autocmd! TextChangedI * call memo_vim#update_memo_position()
+    autocmd TextChangedI * call memo_vim#update_memo_position()
 
-autocmd! CursorMoved,WinEnter * call memo_vim#moved_cursor()  " カーソルが移動した時、別のウィンドウに入った時
+    autocmd CursorMoved,WinEnter * call memo_vim#moved_cursor()  " カーソルが移動した時、別のウィンドウに入った時
 
-autocmd! WinLeave * call memo_vim#write_to_file(0)  " ウィンドウを移動した時
+    autocmd WinLeave * call memo_vim#write_to_file(0)  " ウィンドウを移動した時
 
-autocmd! BufWriteCmd * call memo_vim#write_to_file(1)  " wによって書き込みされた時。acwriteでないバッファまでwrite_to_file以外で保存できなくなる？
+    " autocmd BufWriteCmd * call memo_vim#write_to_file(1)
+    " wによって書き込みされた時。acwriteでないバッファまでwrite_to_file以外で保存できなくなる？ FIXME: 他の書き込みイベント(PyFlakeなど)も無効になる
 
-autocmd! BufWinLeave * call memo_vim#write_to_file(0)  " バッファが破棄された時
+    autocmd BufWinLeave * call memo_vim#write_to_file(0)  " バッファが破棄された時
 
-autocmd! BufRead * call memo_vim#init_buffer()
+    " autocmd! BufRead * call memo_vim#init_buffer()
 
-autocmd! TabLeave * call memo_vim#tab_leave()
+    autocmd TabLeave * call memo_vim#tab_leave()
+augroup END
 
 
 " call memo_vim#set_autcmd_group(g:memo_effect)
@@ -71,4 +75,5 @@ nnoremap <silent> <Plug>(open_memo) :<C-u>call memo_vim#open_window()<CR>
 nnoremap <silent> <Plug>(toggle_memo) :<C-u>call memo_vim#toggle_memo()<CR>
 nnoremap <silent> <Plug>(leave_memo) :<C-u>call memo_vim#leave_memo()<CR>
 nnoremap <silent> <Plug>(click_summary) :<C-u>python clickSummary()<CR>
+nnoremap <silent> <Plug>(open_summary) :<C-u>python openSummary()<CR>
 

@@ -28,6 +28,7 @@ command! UpdatePositon call memo_vim#update_memo_position()
 
 command! SaveMemo call memo_vim#write_to_file(0)
 
+" メモウィンドウの開閉
 command! ToggleMemoVim call memo_vim#toggle_memo()
 
 command! ToggleSummary call memo_vim#toggle_summary()
@@ -50,18 +51,12 @@ augroup memovim_autocmd
 
     autocmd WinLeave * call memo_vim#write_to_file(0)  " ウィンドウを移動した時
 
-    " autocmd BufWriteCmd * call memo_vim#write_to_file(1)
-    " wによって書き込みされた時。acwriteでないバッファまでwrite_to_file以外で保存できなくなる？ FIXME: 他の書き込みイベント(PyFlakeなど)も無効になる
-
     autocmd BufWinLeave * call memo_vim#write_to_file(0)  " バッファが破棄された時
-
-    " autocmd! BufRead * call memo_vim#init_buffer()
 
     autocmd TabLeave * call memo_vim#tab_leave()
 augroup END
 
 
-" call memo_vim#set_autcmd_group(g:memo_effect)
 
 " プラグインの機能をマップ用に定義する
 " <Plug>(click_summary)でマップできるようになる

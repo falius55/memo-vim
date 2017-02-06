@@ -10,7 +10,6 @@ from util.utils import boundMode
 from textdiff import DiffParser
 
 from constant import MEMORY_PRE_TEXT
-# from constant import MEMO_OPEN
 
 
 class Operator(object):
@@ -26,13 +25,23 @@ class Operator(object):
         self._opener = Opener(vim, self._bufferManager, self._state)
 
     def openContent(self):
+        """
+        メモ内容を表示するページを開く
+        """
         row = self._state.currentTargetLineNumber()
         self._opener.openContent(row)
 
     def openSummary(self):
+        """
+        概要ページを開く
+        """
         self._opener.openSummary(False)
 
     def leave(self):
+        """
+        メモウィンドウからもとのバッファにカーソルを移し、
+        メモを保存する
+        """
         if self._state.isInTargetBuffer():
             return
         targetBuffer = self._bufferManager.getCurrentTargetBuffer()
@@ -54,9 +63,7 @@ class Operator(object):
             print '保存対象のファイルが見つかりません'
             return
         if bl and self._state.isInTargetBuffer():
-            # targetBuffer.findWindow().move()
             vim.command('w')
-            # targetBuffer.setModified(False)
 
         memo = targetBuffer.getMemo()
 
@@ -72,6 +79,9 @@ class Operator(object):
         memo.saveFile()
 
     def updateMemoPosition(self):
+        """
+        テキストの変更に応じてメモのポジションをずらす。
+        """
         if self._state.isInMemoBuffer():
             return
         targetBuffer = self._bufferManager.getCurrentTargetBuffer()
@@ -102,18 +112,17 @@ class Operator(object):
         self._state.toggleSummaryOrContent()
         self._opener.auto()
 
-    # def initBuffer(self):
-    #     if self._state.isInMemoBuffer():
-    #         return
-    #     targetBuffer = self._bufferManager.getCurrentBuffer()
-    #     targetBuffer.setTag(MEMORY_PRE_TEXT, targetBuffer.getContentsList())
-
     def tabLeaved(self):
+        """
+        タブを移動すると一旦閉じる。移動後はすぐにカーソル移動イベントで再び開くので、
+        見た目には閉じたように見えない。
+        """
         self._opener.close()
 
     def toggleMemo(self):
         """
-        メモウィンドウの有効無効を切り替える。これは'常にウィンドウを開く'と'ウィンドウを全く開かない'のトグルなので、必要に応じて開く設定にはならない
+        メモウィンドウの有効無効を切り替える。これは'常にウィンドウを開く'と
+        'ウィンドウを全く開かない'のトグルなので、必要に応じて開く設定にはならない
         """
         if self._state.isInvalid():
             self._state.toAlltime()

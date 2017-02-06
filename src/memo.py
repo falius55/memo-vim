@@ -5,13 +5,6 @@ import json
 
 import vim
 
-from constant import ROW_TAG
-from constant import BUFFER_TYPE
-from constant import MEMO_SUMMARY
-from constant import MEMO_CONTENTS
-from util.utils import makeMemoName
-from util.utils import makeSummaryName
-
 
 class Memo(object):
     """
@@ -142,13 +135,13 @@ class Memo(object):
         削除行以降のメモの行を一行減らす
         """
         memo = self._memo
-        if row in memo:
-            del memo[row]
         for key in memo.keys():  # 削除や追加をループ内で行うため、キーリストをコピーしておくよう明示的にkeys()
             if key > row:
-                content = memo[key]
+                if key - 1 in memo:
+                    memo[key - 1] = memo[key - 1] + memo[key]
+                else:
+                    memo[key - 1] = memo[key]
                 del memo[key]
-                memo[key - 1] = content
 
     def notifyAddRow(self, row):
         """

@@ -63,14 +63,6 @@ def moveMemo(fromRow=None, toRow=None):
     operator.moveMemo(fromRow, toRow)
 
 
-# def initBuffer():
-#     """
-#     バッファが読み込まれた時点でのテキスト内容を保存する
-#     最初のバッファのコンストラクタは下記のグローバルスコープにおけるVim()内にて実行される。つまり、vimの設定ファイル内でpyfileを使って読み込まれる際に実行されるので、その時点ではバッファにテキストが読み込まれておらず空文字が取得されてしまう。そのため、バッファが読み込まれた際のイベントで内容を記憶する必要がある
-#     """
-#     operator.initBuffer()
-
-
 def tabLeaved():
     operator.tabLeaved()
 

@@ -1,6 +1,5 @@
 #!/usr/bin/python3.4
 # -*- coding: utf-8 -*-
-from constant import MEMO_BUFFER_TAG
 from scrctrl.window import Window, Position
 from scrctrl.memowindow import MemoWindow
 from scrctrl.memobuffer import MemoBuffer
@@ -34,15 +33,15 @@ class Opener(object):
             return
 
         if isInMemo:
-            self._bufferManager.getTopMemoBuffer().findWindow().move()
+            self._bufferManager.memoBuffer.findWindow().move()
 
     def openContent(self, row, moveActive=True):
         if not isinstance(row, int):
             raise ValueError('row is needed int type')
-        targetBuffer = self._bufferManager.getCurrentTargetBuffer()
+        targetBuffer = self._bufferManager.target
         if targetBuffer is None:
             return
-        memo = targetBuffer.getMemo()
+        memo = targetBuffer.memo
         memoBuffer = self._openWindow()
 
         if self._state.isContentMemoOpened(row):
@@ -54,9 +53,12 @@ class Opener(object):
             memoBuffer.findWindow().move()
 
     def openSummary(self, moveActive=True):
-        targetBuffer = self._bufferManager.getCurrentTargetBuffer()
+        """
+        概要を開き、ターゲットバッファの現在行からもっとも近い位置にあるメモの概要にカーソルを当てます
+        """
+        targetBuffer = self._bufferManager.target
         memoBuffer = self._openWindow()
-        memo = targetBuffer.getMemo()
+        memo = targetBuffer.memo
 
         memoBuffer.loadSummary(memo)
 
@@ -67,13 +69,13 @@ class Opener(object):
         cursorPos = memo.indexOfKey(memo.closestRow(lineNumber)) + 1
         if cursorPos == 0:
             return
-        memoBuffer.findWindow().setCursorPos(cursorPos, 0)
+        memoBuffer.findWindow().cursorPos = (cursorPos, 0)
 
     def close(self):
         if self._state.isMemoOpened():
-            memoBuffer = self._bufferManager.getTopMemoBuffer()
-            targetBuffer = self._bufferManager.getCurrentTargetBuffer()
-            memo = targetBuffer.getMemo()
+            memoBuffer = self._bufferManager.memoBuffer
+            targetBuffer = self._bufferManager.target
+            memo = targetBuffer.memo
             memoBuffer.finish()
             memo.setBuffer(None)
 
@@ -96,10 +98,10 @@ class Opener(object):
         すでにメモウィンドウが開いていれば単にバッファを返すのみとなる
         """
         # TODO: 働きをBufferManagerに移動
-        memoBuffer = self._bufferManager.getTopMemoBuffer()
+        memoBuffer = self._bufferManager.memoBuffer
         if memoBuffer is None:
             vim.command('normal =')
             memoWindow = Window.builder(self._vim, bufClass=MemoBuffer, winClass=MemoWindow).pos(Position.TOPPEST).moveActiveWindow(False).size(5).fileType('memovim').bufType('acwrite').build()
-            memoBuffer = memoWindow.getBuffer()
+            memoBuffer = memoWindow.buffer
 
         return memoBuffer

@@ -1,11 +1,6 @@
 #!/usr/bin/python3.4
 # -*- coding: utf-8 -*-
 
-from constant import MEMO_BUFFER_TAG
-from constant import BUFFER_TYPE
-from constant import MEMO_CONTENTS
-from constant import MEMO_SUMMARY
-from constant import ROW_TAG
 from constant import VAR_MEMO_OPEN
 
 import vim
@@ -25,13 +20,13 @@ class StateManager(object):
         何行目にカーソルがあるか
         カーソル位置は１から始まる
         """
-        targetBuffer = self._bufferManager.getCurrentTargetBuffer()
-        return targetBuffer.findWindow().getCursorPos()[0]
+        targetBuffer = self._bufferManager.target
+        return targetBuffer.findWindow().cursorPos[0]
 
     def lineNumberOfSummary(self):
         import re
-        memoBuffer = self._bufferManager.getTopMemoBuffer()
-        lineNum = memoBuffer.findWindow().getCursorPos()[0]
+        memoBuffer = self._bufferManager.memoBuffer
+        lineNum = memoBuffer.findWindow().cursorPos[0]
         summaryLine = memoBuffer.getText(lineNum - 1)
         p = re.compile(r'^\[(\d+)\]\s*--\s.*$')
         match = p.match(summaryLine)
@@ -40,35 +35,35 @@ class StateManager(object):
             return int(targetLine)
 
     def hasMemoOfCurrentLine(self):
-        targetBuffer = self._bufferManager.getCurrentTargetBuffer()
+        targetBuffer = self._bufferManager.target
         line = self.currentTargetLineNumber()
-        return targetBuffer.getMemo().hasMemo(line)
+        return targetBuffer.memo.hasMemo(line)
 
     def isMemoOpened(self):
-        memoBuffer = self._bufferManager.getTopMemoBuffer()
+        memoBuffer = self._bufferManager.memoBuffer
         return memoBuffer is not None
 
     def isContentMemoOpened(self, row=None):
         if not self.isMemoOpened():
             return False
-        memoBuffer = self._bufferManager.getTopMemoBuffer()
+        memoBuffer = self._bufferManager.memoBuffer
         if row is None:
             return memoBuffer.isContents()
         else:
-            return memoBuffer.row() == row
+            return memoBuffer.row == row
 
     def isSummaryMemoOpened(self):
         if not self.isMemoOpened():
             return False
-        memoBuffer = self._bufferManager.getTopMemoBuffer()
+        memoBuffer = self._bufferManager.memoBuffer
         return memoBuffer.isSummary()
 
     def isInTargetBuffer(self):
-        currentBuffer = self._bufferManager.getCurrentBuffer()
+        currentBuffer = self._bufferManager.current
         return currentBuffer.isTextBuffer()
 
     def isInMemoBuffer(self):
-        currentBuffer = self._bufferManager.getCurrentBuffer()
+        currentBuffer = self._bufferManager.current
         return currentBuffer.isMemoBuffer()
 
     def isSummary(self):

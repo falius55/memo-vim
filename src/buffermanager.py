@@ -12,17 +12,20 @@ class BufferManager(object):
     def __init__(self, vim):
         self._vim = vim
 
-    def getCurrentBuffer(self):
-        return self._vim.getCurrentWindow().getBuffer()
+    @property
+    def current(self):
+        return self._vim.currentWindow.buffer
 
-    def getTopMemoBuffer(self):
+    @property
+    def memoBuffer(self):
         return self._vim.findByTag(MEMO_BUFFER_TAG)
 
-    def getCurrentTargetBuffer(self):
+    @property
+    def target(self):
         """
         return Nullable
         """
-        currentBuffer = self.getCurrentBuffer()
+        currentBuffer = self.current
         if currentBuffer.isMemoBuffer():
             return self._findTargetBufferFrom(currentBuffer)
         return currentBuffer
@@ -32,7 +35,7 @@ class BufferManager(object):
         2つのバッファが同じテキストに対するものかどうか
         """
         from os.path import basename
-        targetBaseName = basename(targetBuffer.getName())[0]
+        targetBaseName = basename(targetBuffer.name)[0]
         targetName = self.getTargetName(memoBuffer)
         if targetName is None:
             return False
@@ -59,6 +62,6 @@ class BufferManager(object):
         """
         import re
         p = re.compile(r'[^-]+-([^-]+)-memo.*|summary--(.*)$')  # 後者はMemo.loadSummaryで定義
-        match = p.match(memoBuffer.getName())
+        match = p.match(memoBuffer.name)
         if match:
             return match.group(match.lastindex)

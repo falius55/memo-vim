@@ -12,6 +12,7 @@ class Tab(object):
         self._vim = vim
         self._tag = {}
 
+    @property
     def elem(self):
         return self._tab
 
@@ -28,7 +29,8 @@ class Tab(object):
             return self._tag.get(Tab.DEFAULT_KEY, defaultIfNotFound)
         return self._tag.get(key, defaultIfNotFound)
 
-    def getNumber(self):
+    @property
+    def number(self):
         return self._tab.number
 
     def findWindows(self):

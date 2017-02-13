@@ -30,20 +30,24 @@ class Window(object):
         self._vim = vim
         self._tag = {}
 
-    def getBuffer(self):
+    @property
+    def buffer(self):
         ret = self._vim.find(self._window.buffer)
         if ret is None:
             raise ValueError('this window has no buffer')
         return ret
 
-    def getCursorPos(self):
+    @property
+    def cursorPos(self):
         return self._window.cursor
 
-    def setCursorPos(self, row, column):
+    @cursorPos.setter
+    def cursorPos(self, cursorTuple):
         """
+        @param (row, column)
         カーソル移動イベントが発生します
         """
-        self._window.cursor = (row, column)
+        self._window.cursor = (cursorTuple[0], cursorTuple[1])
 
     def height(self, cntLine=None):
         if cntLine is None:
@@ -76,7 +80,8 @@ class Window(object):
     def getOption(self, optionName):
         return self._window.options[optionName]
 
-    def getNumber(self):
+    @property
+    def number(self):
         """
         ウィンドウ番号。ウィンドウが削除されれば番号は詰められ、必ず各ウィンドウの番号は連番となる
         """
@@ -98,6 +103,7 @@ class Window(object):
             return self._tag.get(Window.DEFAULT_KEY, defaultIfNotFound)
         return self._tag.get(key, defaultIfNotFound)
 
+    @property
     def elem(self):
         return self._window
 
@@ -108,7 +114,7 @@ class Window(object):
         このウィンドウがすでになければ削除処理のみ行って見た目には何もしない
         """
         try:
-            number = self.getNumber()
+            number = self.number
             vim.command('noautocmd %d wincmd w' % number)  # noautocmdをつけないと、関数の一連の処理の途中でmove()を使った場合にイベント処理が容赦なく割り込んできて想定外の動きとなってしまうことが多い
         except vim.error:
             # すでに削除されたウィンドウにアクセスしようとした場合
@@ -122,7 +128,7 @@ class Window(object):
         カーソルは動かない
         """
         self.move()
-        vim.command('buffer %d' % self.getNumber())
+        vim.command('buffer %d' % self.number)
 
     def __eq__(self, another):
         """
@@ -210,18 +216,18 @@ class WindowBuilder(object):
         return self
 
     def build(self):
-        saveWindow = self._vim.getCurrentWindow()
+        saveWindow = self._vim.currentWindow
 
         newWindow = self._createWindow()
-        newBuffer = newWindow.getBuffer()
+        newBuffer = newWindow.buffer
         self._setSize(newWindow, self._size)
-        newBuffer.setModifiable(self._modifiable)
+        newBuffer.modifiable = self._modifiable
         if self._name is not None:
-            newBuffer.setName(self._name)
+            newBuffer.name = self._name
         if self._bufType is not None:
-            newBuffer.setType(self._bufType)
+            newBuffer.type = self._bufType
         if self._filetype is not None:
-            newBuffer.setFileType(self._filetype)
+            newBuffer.fileType = self._filetype
         if self._tag is not None:
             newBuffer.setTag(self._tag)
 
@@ -259,9 +265,9 @@ class WindowBuilder(object):
                 return 'new'
         else:
             if isVertical:
-                return 'vsp ' + recycleBuffer.getName()
+                return 'vsp ' + recycleBuffer.name
             else:
-                return 'sp ' + recycleBuffer.getName()
+                return 'sp ' + recycleBuffer.name
 
     def _keepUpVim(self):
         """
@@ -312,6 +318,3 @@ if __name__ == '__main__':
     print __name__
     from scrctrl.extendvim import Vim
     newWindow = WindowBuilder(Vim()).modifiable(False).pos(Position.TOPPEST).size(10).build()
-    # newWindow.getBuffer().printing()
-    # print 'modifiable ', newWindow.getBuffer().isModified()
-    print 'buffer attr : ', newWindow.getBuffer().isModifiable()

@@ -19,9 +19,14 @@ class Memo(object):
         if savePath is None:
             savePath = path.dirname(str(targetBuffer))
             filename = path.splitext(targetBuffer.name)[0] + '.memo'
+            self._saveFilePath = path.join(savePath, filename)
         else:
             filename = path.splitext(str(targetBuffer))[0] + '.memo'
-        self._saveFilePath = ''.join([savePath, filename])
+            if savePath.endswith('/'):
+                savePath = savePath[:-1]
+            if filename.startswith('/'):
+                filename = filename[1:]
+            self._saveFilePath = '/'.join([savePath, filename])
         self._memo = self._readFile(self._saveFilePath)
 
         self._targetBuffer = targetBuffer
@@ -128,7 +133,7 @@ class Memo(object):
         import os
         if path.exists(self._saveFilePath):
             os.chmod(self._saveFilePath, 0o666)  # 読み書き可
-        else:
+        elif not path.exists(path.dirname(self._saveFilePath)):
             os.makedirs(path.dirname(self._saveFilePath))
 
         jsonString = json.dumps(self._memo)

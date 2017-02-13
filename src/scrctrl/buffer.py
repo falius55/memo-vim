@@ -47,12 +47,6 @@ class Buffer(object):
         """
         return self._buf.name
 
-    def setName(self, name):
-        """
-        @throw vim.error すでに存在する名前をつけようとした場合
-        """
-        self._buf.name = name
-
     @property
     def name(self):
         """
@@ -60,6 +54,13 @@ class Buffer(object):
         """
         from os.path import basename
         return basename(str(self))
+
+    @name.setter
+    def name(self, name):
+        """
+        @throw vim.error すでに存在する名前をつけようとした場合
+        """
+        self._buf.name = name
 
     def setTag(self, key=None, tag=None):
         """

@@ -40,6 +40,7 @@ class MemoBuffer(Buffer):
         self._type = None
         self._row = None
         self._initMappings()
+        self._target = None
 
     @saveWindow
     def _initMappings(self):
@@ -66,6 +67,10 @@ class MemoBuffer(Buffer):
         """
         return self._row
 
+    @property
+    def target(self):
+        return self._target
+
     def loadContent(self, memo, row):
         if not isinstance(row, int):
             raise ValueError('row is not int type')
@@ -77,7 +82,7 @@ class MemoBuffer(Buffer):
 
         self.modified = False
         memoName = makeMemoName(memo.target, row)
-        self.setName(memoName)
+        self.name = memoName
         self._row = row
         self._type = MEMO_CONTENTS
         self.modifiable = True
@@ -86,6 +91,7 @@ class MemoBuffer(Buffer):
         self.findWindow().setOption('number', True)
         self.clearUndo()
         memo.buffer = self
+        self._target = memo.target
 
         self._initContentMappings()
 
@@ -99,7 +105,7 @@ class MemoBuffer(Buffer):
         self.modified = False
         summaryName = makeSummaryName(memo.target)
         try:
-            self.setName(summaryName)
+            self.name = summaryName
         except vim.error:
             print 'すでにある名前', summaryName
         self._row = None
@@ -109,6 +115,7 @@ class MemoBuffer(Buffer):
         self.setOption('swapfile', False)
         self.findWindow().setOption('number', False)
         memo.buffer = self
+        self._target = memo.target
 
         self._initSummaryMappings()
 

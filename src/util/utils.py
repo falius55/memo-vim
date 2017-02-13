@@ -40,9 +40,9 @@ def boundMode(mode):
 
 def makeMemoName(targetBuffer, row):
     from os.path import splitext
-    return '%sfile-%s-memo[%d]' % (targetBuffer.fileType, splitext(targetBuffer.name)[0], row)
+    return '%s.memo[%d]' % (splitext(str(targetBuffer))[0], row)
 
 
 def makeSummaryName(targetBuffer):
     from os.path import splitext
-    return '%sfile-%s-memo-summary' % (targetBuffer.fileType, splitext(targetBuffer.name)[0])
+    return '%s.memo-summary' % splitext(str(targetBuffer))[0]

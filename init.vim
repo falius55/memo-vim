@@ -32,8 +32,6 @@ endfunction
 
 comman! OpenMemo call memo_vim#open_window()
 
-command! UpdatePositon call memo_vim#update_memo_position()
-
 command! SaveMemo call memo_vim#write_to_file(0)
 
 " メモウィンドウの開閉

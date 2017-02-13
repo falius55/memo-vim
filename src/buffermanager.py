@@ -27,7 +27,7 @@ class BufferManager(object):
         """
         currentBuffer = self.current
         if currentBuffer.isMemoBuffer():
-            return self._findTargetBufferFrom(currentBuffer)
+            return currentBuffer.target
         return currentBuffer
 
     def equals(self, targetBuffer, memoBuffer):
@@ -41,27 +41,3 @@ class BufferManager(object):
             return False
         memoTargetName = basename(targetName)[0]
         return targetBaseName == memoTargetName
-
-    # FIXME: ディレクトリの異なる同名ファイル(拡張子が違っても)を開いていたら適切なターゲットを取得できない
-    def _findTargetBufferFrom(self, memoBuffer):
-        """
-        メモバッファーを渡すことでそのメモが対象としているテキストバッファを得られます
-        return Nullable
-        """
-        vimObject = self._vim
-        targetName = self.getTargetName(memoBuffer)
-        if targetName is None:
-            return None
-        ret = vimObject.findBufferByName(targetName)
-        return ret
-
-    @staticmethod
-    def getTargetName(memoBuffer):
-        """
-        拡張子がある場合とない場合があるので注意
-        """
-        import re
-        p = re.compile(r'[^-]+-([^-]+)-memo.*|summary--(.*)$')  # 後者はMemo.loadSummaryで定義
-        match = p.match(memoBuffer.name)
-        if match:
-            return match.group(match.lastindex)

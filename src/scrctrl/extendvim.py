@@ -128,6 +128,7 @@ class Vim(object):
     @checkDeadElem
     def findBufferByName(self, name):
         """
+        拡張子抜きで比較して探す
         return Nullable
         """
         from os.path import splitext

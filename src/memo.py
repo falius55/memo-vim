@@ -125,13 +125,16 @@ class Memo(object):
         return None
 
     def saveFile(self):
-        savePath = path.dirname(self._saveFilePath)
-        if not path.exists(savePath):
-            import os
-            os.makedirs(savePath)
+        import os
+        if path.exists(self._saveFilePath):
+            os.chmod(self._saveFilePath, 0o666)  # 読み書き可
+        else:
+            os.makedirs(path.dirname(self._saveFilePath))
+
         jsonString = json.dumps(self._memo)
         with open(self._saveFilePath, 'w') as f:
             f.write(jsonString)
+            os.chmod(self._saveFilePath, 0o444)  # 読み込み専用
 
     def notifyDeleteRow(self, row):
         """
@@ -165,6 +168,9 @@ class Memo(object):
                 break
 
     def _readFile(self, saveFilePath):
+        """
+        JSON文字列のキーが数字でなければ無視する
+        """
         if not path.exists(saveFilePath):
             return {}
 
@@ -178,8 +184,11 @@ class Memo(object):
             readObject = json.loads(jsonString)
         except json.JSONDecodeError:
             return {}
+        # jsonから読み込むとキーが文字列になっているので整数に変換
         for key in readObject:
-            ret[int(key)] = readObject[key]  # jsonから読み込むとキーが文字列になっているので整数に変換
+            if not key.isdigit():
+                continue
+            ret[int(key)] = readObject[key]
         return ret
 
     def deleteFile(self):

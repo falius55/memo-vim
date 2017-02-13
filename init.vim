@@ -8,7 +8,7 @@ if b:not_read == 1
     finish
 endif
 
-let g:memo_vim_directorypath = '/home/black-ubuntu/.vim/plugin/memos'  " メモを保存するディレクトリ。このディレクトリに、'対象ファイル名-memo'で保存される
+let g:memo_vim_directorypath = '/home/black-ubuntu/.vim/plugin/memos'  " メモを保存するディレクトリ。このディレクトリに、'同等のディレクトリパス/対象ファイル名.memo'で保存される
 let g:memo_open = 2  " メモウィンドウの設定 0:全く開かない 1: 必要に応じて開く 2: 常に開いた状態にしておく
 
 let g:dirpath = fnamemodify(resolve(expand('<sfile>:p')), ':h')  " 現在ディレクトリ。関数内では書けない

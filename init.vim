@@ -1,14 +1,23 @@
+if (exists('b:did_memovim'))
+    finish
+endif
+let b:did_memovim = 1
+
 let b:not_read = 0
 if b:not_read == 1
     finish
 endif
 
 let g:memo_vim_directorypath = '/home/black-ubuntu/.vim/plugin/memos'  " メモを保存するディレクトリ。このディレクトリに、'対象ファイル名-memo'で保存される
-" let g:memo_effect = 1  " カーソル移動イベントの有効無効 0:無効 1:有効
 let g:memo_open = 2  " メモウィンドウの設定 0:全く開かない 1: 必要に応じて開く 2: 常に開いた状態にしておく
 
 let g:dirpath = fnamemodify(resolve(expand('<sfile>:p')), ':h')  " 現在ディレクトリ。関数内では書けない
 function! s:init_py() abort
+    if (exists('b:inited_memovim'))
+        return
+    endif
+    let b:inited_memovim = 1
+
     let l:srcpath = g:dirpath."/src"
     let l:init_py_file = l:srcpath."/init.py"
     let l:function_py_file = l:srcpath."/functions.py"
@@ -20,7 +29,6 @@ INITPYTHON
     execute 'pyfile '.l:function_py_file
 endfunction
 
-call s:init_py()
 
 comman! OpenMemo call memo_vim#open_window()
 
@@ -41,22 +49,51 @@ command! DebugMemo call memo_vim#debug_memo()
 
 command! CloseMemo call memo_vim#memo_close()
 
-augroup memovim_autocmd
-    autocmd!
-    autocmd TextChanged * call memo_vim#update_memo_position()
+command! StartMemo call s:startMemo()
 
-    autocmd TextChangedI * call memo_vim#update_memo_position()
+command! StopMemo call s:stopMemo()
 
-    autocmd CursorMoved,WinEnter * call memo_vim#moved_cursor()  " カーソルが移動した時、別のウィンドウに入った時
+function! s:setAutoCommand() abort
+    augroup memovim_autocmd
+        autocmd!
+        autocmd TextChanged * call memo_vim#update_memo_position()
 
-    autocmd WinLeave * call memo_vim#write_to_file(0)  " ウィンドウを移動した時
+        autocmd TextChangedI * call memo_vim#update_memo_position()
 
-    autocmd BufWinLeave * call memo_vim#write_to_file(0)  " バッファが破棄された時
+        autocmd CursorMoved,WinEnter * call memo_vim#moved_cursor()  " カーソルが移動した時、別のウィンドウに入った時
 
-    autocmd TabLeave * call memo_vim#tab_leave()
-augroup END
+        autocmd WinLeave * call memo_vim#write_to_file(0)  " ウィンドウを移動した時
 
+        autocmd BufWinLeave * call memo_vim#write_to_file(0)  " バッファが破棄された時
 
+        autocmd TabLeave * call memo_vim#tab_leave()
+    augroup END
+endfunction
+
+function! s:removeAutoCommand() abort
+    autocmd! memovim_autocmd
+endfunction
+
+function! s:startMemo() abort
+    if (exists('s:cach_memo_open'))
+        let g:memo_open = s:cach_memo_open
+    endif
+    call s:init_py()
+    call s:setAutoCommand()
+endfunction
+
+function! s:stopMemo() abort
+    if !(exists('b:inited_memovim'))
+        return
+    endif
+    if (exists('g:memo_open'))
+        let s:cach_memo_open = g:memo_open
+    endif
+    CloseMemo
+    call s:removeAutoCommand()
+endfunction
+
+call s:startMemo()
 
 " プラグインの機能をマップ用に定義する
 " <Plug>(click_summary)でマップできるようになる

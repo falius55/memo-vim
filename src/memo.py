@@ -75,6 +75,8 @@ class Memo(object):
         return self._memo.get(row, [])
 
     def summary(self):
+        if self.isEmpty():
+            return ['empty']
         memo = self._memo
         keys = list(memo.keys())
         keys.sort()
@@ -162,12 +164,16 @@ class Memo(object):
         if not path.exists(saveFilePath):
             return {}
 
-        # TODO: jsonファイルが書き換えられるなどして読み込めなくなっていた場合の処理を行う。余計な改行が入っているなどの場合はつなげるだけでいいのでエラー扱いにはしない
+        jsonString = ''
         with open(saveFilePath, 'r') as f:
-            jsonString = f.read()
+            for line in f:
+                jsonString += line
 
         ret = {}
-        readObject = json.loads(jsonString)
+        try:
+            readObject = json.loads(jsonString)
+        except json.JSONDecodeError:
+            return {}
         for key in readObject:
             ret[int(key)] = readObject[key]  # jsonから読み込むとキーが文字列になっているので整数に変換
         return ret

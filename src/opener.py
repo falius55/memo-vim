@@ -74,10 +74,13 @@ class Opener(object):
     def close(self):
         if self._state.isMemoOpened():
             memoBuffer = self._bufferManager.memoBuffer
-            targetBuffer = self._bufferManager.target
-            memo = targetBuffer.memo
             memoBuffer.finish()
-            memo.setBuffer(None)
+
+            targetBuffer = self._bufferManager.target
+            if targetBuffer is None:
+                return
+            memo = targetBuffer.memo
+            memo.buffer = None
 
     def _autoOnRequired(self):
         if self._state.hasMemoOfCurrentLine():

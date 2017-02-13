@@ -161,6 +161,10 @@ class Operator(object):
             else:
                 print '後方にメモが見つからなかったので最初に戻ります'
 
+        if nextRow > currentTargetBuffer.rowLen:
+            print '範囲外のメモです', nextRow
+            return
+
         currentTargetWindow.cursorPos = (nextRow, 0)
 
     def prevMemo(self):
@@ -179,6 +183,10 @@ class Operator(object):
                 return
             else:
                 print '前方にメモが見つからなかったので最後に戻ります'
+
+        if prevRow > currentTargetBuffer.rowLen:
+            print '範囲外のメモです', prevRow
+            return
 
         currentTargetWindow.cursorPos = (prevRow, 0)
 

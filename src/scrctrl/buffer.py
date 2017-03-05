@@ -1,8 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-from memo import Memo
 from util.utils import saveWindow
-from constant import MEMO_DIRECTORY_PATH
 
 import vim
 
@@ -15,16 +13,16 @@ def checkTextChange(func):
     """
 
     def wrapper(self, *args, **kwargs):
-        if self.isModifiable():
+        if self.modifiable:
             result = func(self, *args, **kwargs)
             return result
 
-        self.setModifiable(True)
+        self.modifiable = True
 
         result = func(self, *args, **kwargs)
 
-        self.setModifiable(False)
-        self.setModified(False)  # modifiableがfalseなら、変更されても保存せずに閉じられるように変更通知を取り消す
+        self.modifiable = False
+        self.modified = False  # modifiableがfalseなら、変更されても保存せずに閉じられるように変更通知を取り消す
         return result
     return wrapper
 
@@ -49,18 +47,20 @@ class Buffer(object):
         """
         return self._buf.name
 
-    def setName(self, name):
-        """
-        @throw vim.error すでに存在する名前をつけようとした場合
-        """
-        self._buf.name = name
-
-    def getName(self):
+    @property
+    def name(self):
         """
         パスで名はなく、単純なファイル名
         """
         from os.path import basename
         return basename(str(self))
+
+    @name.setter
+    def name(self, name):
+        """
+        @throw vim.error すでに存在する名前をつけようとした場合
+        """
+        self._buf.name = name
 
     def setTag(self, key=None, tag=None):
         """
@@ -85,10 +85,12 @@ class Buffer(object):
             return self._tag.get(Buffer.DEFAULT_KEY, defaultIfNotFound)
         return self._tag.get(key, defaultIfNotFound)
 
+    @property
     def elem(self):
         return self._buf
 
-    def getNumber(self):
+    @property
+    def number(self):
         return self._buf.number
 
     def findWindow(self):
@@ -173,44 +175,51 @@ class Buffer(object):
         """
         contents.writeText(self)
 
-    def getRowLen(self):
+    @property
+    def rowLen(self):
         return len(self._buf)
 
     def isEmpty(self):
-        if self.getRowLen() == 0:
+        if self.rowLen == 0:
             return True
-        return self.getRowLen() == 1 and self.getText(0).lstrip() == ''
+        return self.rowLen == 1 and self.getText(0).lstrip() == ''
 
-    def isModified(self):
+    @property
+    def modified(self):
         """
         テキストが変更されたのかどうか([＋]がついているかどうか)
         """
         return self._buf.options['modified']
 
-    def setModified(self, isModified=True):
+    @modified.setter
+    def modified(self, isModified):
         self._buf.options['modified'] = isModified
 
-    def setModifiable(self, canModifiable):
+    @property
+    def modifiable(self):
+        """
+        修正可能かどうかの真偽値
+        """
+        return self._buf.options['modifiable']
+
+    @modifiable.setter
+    def modifiable(self, canModifiable):
         """
         Falseを設定することで変更できなくなる
         @param canModifiable 真偽値
         """
         self._buf.options['modifiable'] = canModifiable
 
-    def isModifiable(self):
-        """
-        修正可能かどうかの真偽値
-        """
-        return self._buf.options['modifiable']
+    @property
+    def fileType(self):
+        return self._buf.options['filetype']
 
-    def setFileType(self, filetype):
+    @fileType.setter
+    def fileType(self, filetype):
         """
         filetypeは文字列だが、空白が含まれているとエラー
         """
         self._buf.options['filetype'] = filetype
-
-    def getFileType(self):
-        return self._buf.options['filetype']
 
     @saveWindow
     def mapQStop(self, canStop=True):
@@ -224,10 +233,16 @@ class Buffer(object):
         else:
             vim.command('nunmap <buffer> q')
 
-    def setType(self, type):
+    @property
+    def type(self):
+        return self._buf.options['buftype']
+
+    @type.setter
+    def type(self, type):
         self._buf.options['buftype'] = type
 
-    def getContentsList(self):
+    @property
+    def contentsList(self):
         return [line for line in self._buf]
 
     def __eq__(self, another):
@@ -266,7 +281,7 @@ class Buffer(object):
         vim.command('exe "normal a \<BS>\<ESC>"')
         vim.command('let &undolevels = old_undolevels')
         vim.command('unlet old_undolevels')
-        self.setModified(False)
+        self.modified = False
 
     @saveWindow
     def source(self, path):
@@ -288,7 +303,7 @@ if __name__ == '__main__':
     print __package__
     from scrctrl.extendvim import Vim
     vimObject = globals().get('vimObject', Vim())
-    curBuffer = vimObject.getCurrentWindow().getBuffer()
+    curBuffer = vimObject.currentWindow.buffer
     if not hasattr(curBuffer, '_contents'):
         curBuffer.memoryContents()
         print 'memory current buffer:', curBuffer._buf.name

@@ -89,7 +89,7 @@ def prevMemo():
 
 def debugMemo():
     try:
-        print 'Buffer() list', [e.getName() for e in vimObject._buffers]
+        print 'Buffer() list', [e.name for e in vimObject._buffers]
     except vim.error:
         print 'vim.error'
     print 'buffer elems', [e.name for e in vim.buffers]

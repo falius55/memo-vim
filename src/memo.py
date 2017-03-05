@@ -18,27 +18,30 @@ class Memo(object):
         """
         if savePath is None:
             savePath = path.dirname(str(targetBuffer))
-        filename = path.splitext(str(targetBuffer))[0].replace('/', '_') + '-memo'
-        self._saveFilePath = path.join(
-            savePath,
-            filename)
+            filename = path.splitext(targetBuffer.name)[0] + '.memo'
+            self._saveFilePath = path.join(savePath, filename)
+        else:
+            filename = path.splitext(str(targetBuffer))[0] + '.memo'
+            if savePath.endswith('/'):
+                savePath = savePath[:-1]
+            if filename.startswith('/'):
+                filename = filename[1:]
+            self._saveFilePath = '/'.join([savePath, filename])
         self._memo = self._readFile(self._saveFilePath)
 
         self._targetBuffer = targetBuffer
         self._memoBuffer = None
 
-    def setBuffer(self, memoBuffer):
-        """
-        自身の内容を表示するメモバッファを保持させる
-        バッファにロードした時に設定し、
-        メモバッファを破棄するときにNoneを設定する
-        """
-        self._memoBuffer = memoBuffer
-
-    def getBuffer(self):
+    @property
+    def buffer(self):
         return self._memoBuffer
 
-    def getTarget(self):
+    @buffer.setter
+    def buffer(self, memoBuffer):
+        self._memoBuffer = memoBuffer
+
+    @property
+    def target(self):
         return self._targetBuffer
 
     def isEmpty(self):
@@ -49,7 +52,7 @@ class Memo(object):
         if memoBuffer is None:
             return False
         try:
-            if memoBuffer.elem() in vim.buffer:
+            if memoBuffer.elem in vim.buffer:
                 return True
         except vim.error:  # すでに閉じられていれば例外が投げられるはず
             return False
@@ -60,16 +63,16 @@ class Memo(object):
         """
         if not memoBuffer.isContents():
             raise ValueError('not contents buffer is not kepon out')
-        if memoBuffer != self.getBuffer():
+        if memoBuffer != self.buffer:
             raise ValueError('difference memoBuffer')
-        if memoBuffer.row() != row:
-            row = memoBuffer.row()
+        if memoBuffer.row != row:
+            row = memoBuffer.row
         if memoBuffer.isEmpty():
             self.deleteMemo(row)
             return
 
         memo = []
-        for line in memoBuffer.elem():
+        for line in memoBuffer.elem:
             memo.append(line)
         self._memo[row] = memo
 
@@ -77,6 +80,8 @@ class Memo(object):
         return self._memo.get(row, [])
 
     def summary(self):
+        if self.isEmpty():
+            return ['empty']
         memo = self._memo
         keys = list(memo.keys())
         keys.sort()
@@ -125,9 +130,16 @@ class Memo(object):
         return None
 
     def saveFile(self):
+        import os
+        if path.exists(self._saveFilePath):
+            os.chmod(self._saveFilePath, 0o666)  # 読み書き可
+        elif not path.exists(path.dirname(self._saveFilePath)):
+            os.makedirs(path.dirname(self._saveFilePath))
+
         jsonString = json.dumps(self._memo)
         with open(self._saveFilePath, 'w') as f:
             f.write(jsonString)
+            os.chmod(self._saveFilePath, 0o444)  # 読み込み専用
 
     def notifyDeleteRow(self, row):
         """
@@ -138,7 +150,7 @@ class Memo(object):
         for key in memo.keys():  # 削除や追加をループ内で行うため、キーリストをコピーしておくよう明示的にkeys()
             if key > row:
                 if key - 1 in memo:
-                    memo[key - 1] = memo[key - 1] + memo[key]
+                    memo[key - 1].extend(memo[key])
                 else:
                     memo[key - 1] = memo[key]
                 del memo[key]
@@ -161,17 +173,27 @@ class Memo(object):
                 break
 
     def _readFile(self, saveFilePath):
+        """
+        JSON文字列のキーが数字でなければ無視する
+        """
         if not path.exists(saveFilePath):
             return {}
 
-        # TODO: jsonファイルが書き換えられるなどして読み込めなくなっていた場合の処理を行う。余計な改行が入っているなどの場合はつなげるだけでいいのでエラー扱いにはしない
+        jsonString = ''
         with open(saveFilePath, 'r') as f:
-            jsonString = f.read()
+            for line in f:
+                jsonString += line
 
         ret = {}
-        readObject = json.loads(jsonString)
+        try:
+            readObject = json.loads(jsonString)
+        except json.JSONDecodeError:
+            return {}
+        # jsonから読み込むとキーが文字列になっているので整数に変換
         for key in readObject:
-            ret[int(key)] = readObject[key]  # jsonから読み込むとキーが文字列になっているので整数に変換
+            if not key.isdigit():
+                continue
+            ret[int(key)] = readObject[key]
         return ret
 
     def deleteFile(self):

@@ -18,19 +18,19 @@ def checkActiveElem(func):
         try:
             result = func(self, *args, **kwargs)
         except IndexError:
-            wvim = self if isinstance(self, Vim) else self._vim
-            windows = wvim._windows
+            evim = self if isinstance(self, Vim) else self._vim
+            windows = evim._windows
             for winElem in vim.windows:
                 if winElem not in windows:
-                    wvim.newWindow(winElem)
-            buffers = wvim._buffers
+                    evim.newWindow(winElem)
+            buffers = evim._buffers
             for bufElem in vim.buffers:
                 if bufElem not in buffers:
-                    wvim.newBuffer(bufElem)
-            tabs = wvim._tabs
+                    evim.newBuffer(bufElem)
+            tabs = evim._tabs
             for tabElem in vim.tabpages:
                 if tabElem not in tabs:
-                    wvim.newTab(tabElem)
+                    evim.newTab(tabElem)
             result = func(self, *args, **kwargs)
         return result
     return wrapper
@@ -38,16 +38,16 @@ def checkActiveElem(func):
 
 def checkDeadElem(func):
     def wrapper(self, *args, **kwargs):
-        wvim = self if isinstance(self, Vim) else self._vim
-        for win in wvim._windows:
+        evim = self if isinstance(self, Vim) else self._vim
+        for win in evim._windows:
             if not win.isExist():
-                wvim.remove(wvim)
-        for buf in wvim._buffers:
+                evim.remove(evim)
+        for buf in evim._buffers:
             if not buf.isOpen():
-                wvim.remove(buf)
-        for tab in wvim._tabs:
+                evim.remove(buf)
+        for tab in evim._tabs:
             if not tab.isExist():
-                wvim.remove(tab)
+                evim.remove(tab)
 
         return func(self, *args, **kwargs)
     return wrapper
@@ -104,17 +104,18 @@ class Vim(object):
     def window(self, index):
         return self._windows[index]
 
-    def getCurrentWindow(self):
+    @property
+    def currentWindow(self):
         return self.find(vim.current.window)
 
     @checkActiveElem
     def find(self, elem):
         if isinstance(elem, vim.Window):
-            return filter(lambda e: e.elem() == elem, self._windows)[0]
+            return filter(lambda e: e.elem == elem, self._windows)[0]
         if isinstance(elem, vim.Buffer):
-            return filter(lambda e: e.elem() == elem, self._buffers)[0]
+            return filter(lambda e: e.elem == elem, self._buffers)[0]
         if isinstance(elem, vim.TabPage):
-            return filter(lambda e: e.elem() == elem, self._tabs)[0]
+            return filter(lambda e: e.elem == elem, self._tabs)[0]
         return None
 
     @checkDeadElem
@@ -127,11 +128,12 @@ class Vim(object):
     @checkDeadElem
     def findBufferByName(self, name):
         """
+        拡張子抜きで比較して探す
         return Nullable
         """
         from os.path import splitext
         for buf in self._buffers:
-            if buf.getName() == name or splitext(buf.getName())[0] == name:
+            if buf.name == name or splitext(buf.name)[0] == name:
                 return buf
         # else:
         #     raise ValueError('not found buffer by name ' + name)
@@ -160,11 +162,11 @@ class Vim(object):
     def __hash__(self):
         result = 17
         for buf in self._buffers:
-            result = 31 * result + hash(buf.elem())
+            result = 31 * result + hash(buf.elem)
         for win in self._windows:
-            result = 31 * result + hash(win.elem())
+            result = 31 * result + hash(win.elem)
         for tab in self._tabs:
-            result = 31 * result + hash(tab.elem())
+            result = 31 * result + hash(tab.elem)
         return result
 
     @staticmethod

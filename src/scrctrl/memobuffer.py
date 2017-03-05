@@ -6,22 +6,23 @@ from constant import MEMO_DIRECTORY_PATH
 from constant import MEMO_SUMMARY
 from constant import MEMO_CONTENTS
 from constant import MEMORY_PRE_TEXT
-from constant import ROW_TAG
 from util.utils import makeMemoName
 from util.utils import makeSummaryName
-from memo import Memo
 from util.utils import saveWindow
+from memo import Memo
 
 import vim
+
 
 class TextBuffer(Buffer):
 
     def __init__(self, buf, vim):
         Buffer.__init__(self, buf, vim)
         self._memo = Memo(self, MEMO_DIRECTORY_PATH)
-        self.setTag(MEMORY_PRE_TEXT, self.getContentsList())
+        self.setTag(MEMORY_PRE_TEXT, self.contentsList)
 
-    def getMemo(self):
+    @property
+    def memo(self):
         return self._memo
 
     def isMemoBuffer(self):
@@ -39,6 +40,7 @@ class MemoBuffer(Buffer):
         self._type = None
         self._row = None
         self._initMappings()
+        self._target = None
 
     @saveWindow
     def _initMappings(self):
@@ -57,8 +59,17 @@ class MemoBuffer(Buffer):
     def isSummary(self):
         return self._type == MEMO_SUMMARY
 
+    @property
     def row(self):
+        """
+        現在表示しているメモがターゲットバッファーの何行目に対応するかを返す。
+        概要を表示しているならNoneが返る
+        """
         return self._row
+
+    @property
+    def target(self):
+        return self._target
 
     def loadContent(self, memo, row):
         if not isinstance(row, int):
@@ -69,17 +80,18 @@ class MemoBuffer(Buffer):
         if self.getText(0) == '':
             self.deleteText(0)  # 最初の空行は削除する
 
-        self.setModified(False)
-        memoName = makeMemoName(memo.getTarget(), row)
-        self.setName(memoName)
+        self.modified = False
+        memoName = makeMemoName(memo.target, row)
+        self.name = memoName
         self._row = row
         self._type = MEMO_CONTENTS
-        self.setModifiable(True)
-        self.setType('acwrite')
+        self.modifiable = True
+        self.type = 'acwrite'
         self.setOption('swapfile', False)
         self.findWindow().setOption('number', True)
         self.clearUndo()
-        memo.setBuffer(self)
+        memo.buffer = self
+        self._target = memo.target
 
         self._initContentMappings()
 
@@ -90,19 +102,20 @@ class MemoBuffer(Buffer):
         if self.getText(0) == '':
             self.deleteText(0)
 
-        self.setModified(False)
-        summaryName = makeSummaryName(memo.getTarget())
+        self.modified = False
+        summaryName = makeSummaryName(memo.target)
         try:
-            self.setName(summaryName)
+            self.name = summaryName
         except vim.error:
             print 'すでにある名前', summaryName
         self._row = None
         self._type = MEMO_SUMMARY
-        self.setModifiable(False)
-        self.setType('nofile')
+        self.modifiable = False
+        self.type = 'nofile'
         self.setOption('swapfile', False)
         self.findWindow().setOption('number', False)
-        memo.setBuffer(self)
+        memo.buffer = self
+        self._target = memo.target
 
         self._initSummaryMappings()
 

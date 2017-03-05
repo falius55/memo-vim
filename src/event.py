@@ -23,12 +23,14 @@ def isSameBuffer(vim):
     """
     memoBuffer = vim.findByTag(MEMO_BUFFER_TAG)
     memoName = memoBuffer.getName()
-    currentBuffer = vim.getCurrentWindow().getBuffer()
+    # currentBuffer = vim.getCurrentWindow().getBuffer()
+    currentBuffer = vim.getCurrentWindow().buffer
     return currentBuffer.getName() in memoName
 
 
 def isInMemoBuffer(vim):
-    currentBuffer = vim.getCurrentWindow().getBuffer()
+    # currentBuffer = vim.getCurrentWindow().getBuffer()
+    currentBuffer = vim.getCurrentWindow().buffer
     return currentBuffer.getTag() == MEMO_BUFFER_TAG
 
 
@@ -38,7 +40,8 @@ def operateByState(vim, openWindow, isAlltimeOpenBuffer, isSummary):
     isSummary: 概要を表示する設定になっているかどうか(そうでなければメモ内容を表示)
     """
     currentWindow = vim.getCurrentWindow()
-    currentBuffer = currentWindow.getBuffer()
+    # currentBuffer = currentWindow.getBuffer()
+    currentBuffer = currentWindow.buffer
     lineNumber = currentWindow.getCursorPos()[0]
     memo = currentBuffer.getMemo()
     memoBuffer = vim.findByTag(MEMO_BUFFER_TAG)

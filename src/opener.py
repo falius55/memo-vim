@@ -105,6 +105,7 @@ class Opener(object):
         if memoBuffer is None:
             vim.command('normal =')
             memoWindow = Window.builder(self._vim, bufClass=MemoBuffer, winClass=MemoWindow).pos(Position.TOPPEST).moveActiveWindow(False).size(5).fileType('memovim').bufType('acwrite').build()
+            memoWindow.setOption('winfixheight', True)
             memoBuffer = memoWindow.buffer
 
         return memoBuffer

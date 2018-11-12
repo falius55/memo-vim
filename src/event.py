@@ -12,7 +12,7 @@ from textdiff import DiffParser
 import vim
 
 
-def isMemoOpen(vim):
+def is_memoOpen(vim):
     memoBuffer = vim.findByTag(MEMO_BUFFER_TAG)
     return memoBuffer is not None and memoBuffer.findWindow() is not None
 

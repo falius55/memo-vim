@@ -1,0 +1,6 @@
+memos/
+src/*.pyc
+src/*/*.pyc
+src/uml/
+src/test/
+*.swp
